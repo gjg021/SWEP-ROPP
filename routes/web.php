@@ -1,6 +1,6 @@
 <?php
 
-
+//test commit
 /** Auth **/
 Route::group(['as' => 'auth.'], function () {
 	
