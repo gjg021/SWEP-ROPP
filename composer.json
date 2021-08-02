@@ -10,7 +10,7 @@
         "fideloper/proxy": "~4.0",
         "jacobbennett/pjax": "~1.0",
         "kyslik/column-sortable": "5.6.*",
-        "laravel/framework": "5.6.*",
+        "laravel/framework": "^6.0",
         "laravel/tinker": "~1.0",
         "laravelcollective/html": "^5.6",
         "predis/predis": "^1.1"
