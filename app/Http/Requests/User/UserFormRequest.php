@@ -22,32 +22,27 @@ class UserFormRequest extends FormRequest{
 
         $rules = [
             
-            'firstname'=>'required|string|max:90',
-            'middlename'=>'required|string|max:90',
-            'lastname'=>'required|string|max:90',
-            'email'=>'required|string|email|max:90',
-            'position'=>'required|string|max:90',
-            'username'=>'required|string|max:45|unique:users,username,'.$this->route('user').',slug',
-            'password'=>'sometimes|required|string|min:6|max:45|confirmed',
-
+            'first_name'=>'required|string|max:45',
+            'middle_name'=>'required|string|max:45',
+            'last_name'=>'required|string|max:45',
+            'sex'=>'required|string|max:45',
+            'birthday'=>'required|date|max:45',
+            'phone'=>'required|string|max:45',
+            'region'=>'required|string|max:45',
+            'province'=>'required|string|max:45',
+            'municipality'=>'required|string|max:45',
+            'barangay'=>'required|string|max:45',
+            'address'=>'nullable|string|max:45',
+            'email'=>'required|string|email|max:45|unique:users,email',
+            'business_name' => 'required|string|max:99',
+            'business_tin' => 'required|int|max:999999999999',
+            'business_phone' => 'required|string|max:45',
+//            'username'=>'required|string|max:45|unique:users,username',
+            'password'=>'sometimes|required|string|min:6|max:45|same:password_confirmation',
+            'password_confirmation'=>'sometimes|required|string|min:6|max:45|same:password',
         ];
 
-        if(!empty($this->request->get('menu'))){
-
-            if(!empty($this->request->get('menu'))){
-                foreach($this->request->get('menu') as $key => $value){
-                    $rules['menu.'.$key] = 'string|max:11';
-                } 
-            }
-
-
-            if(!empty($this->request->get('submenu'))){
-                foreach($this->request->get('submenu') as $key => $value){
-                    $rules['submenu.'.$key] = 'string|max:11';
-                }
-            }
-
-        }
+    
 
         return $rules;
 

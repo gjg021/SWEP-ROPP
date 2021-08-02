@@ -62,8 +62,20 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
 
-        Session::flash('CHECK_NOT_LOGGED_IN', 'You have been SIGNED OUT somewhere! Please Sign in again.');
-        return redirect()->guest(route('auth.login'));
+        // Session::flash('CHECK_NOT_LOGGED_IN', 'You have been SIGNED OUT somewhere! Please Sign in again.');
+        $guard = array_get($exception->guards(), 0);
+
+        switch ($guard) {
+            case 'admin':
+                $login = 'admin.login';
+                break;
+            
+            default:
+                $login = 'auth.login' ;
+                break;
+        }
+
+        return redirect()->guest(route($login));
 
     }
 

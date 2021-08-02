@@ -14,35 +14,32 @@ class User extends Authenticatable{
     use Notifiable, Sortable;
 
 
-    protected $dates = ['created_at', 'updated_at', 'last_login_time'];
-    public $sortable = ['username', 'firstname', 'is_online', 'is_active'];
+
     public $timestamps = false;
     protected $hidden = ['password', 'remember_token',];
 
 
     protected $attributes = [
-
-        'slug' => '',
-        'user_id' => '', 
-        'email' => '', 
-        'username' => '', 
-        'password' => '', 
-        'lastname' => '', 
-        'middlename' => '', 
-        'firstname' => '', 
-        'position' => '', 
-        'is_online' => false, 
-        'is_active' => false,
-        'color' => 'skin-green sidebar-mini', 
-        'created_at' => null, 
-        'updated_at' => null,
-        'ip_created' => '',
-        'ip_updated' => '',
-        'user_created' => '',
-        'user_updated' => '',
-        'last_login_time' => null,
-        'last_login_machine' => '',
-        'last_login_ip' => '',
+    
+        'first_name' => '',
+        'middle_name' => '',
+        'last_name' => '',
+        'birthday' => null,
+        'email' => '',
+        'username' => '',
+        'password' => '',
+        'remember_token' => '',
+        'created_at' => '',
+        'updated_at' => '',
+        'is_active' => 1,
+        'is_verified' => 0,
+        'phone' => '',
+        'region' => '',
+        'province' => '',
+        'municipality' => '',
+        'barangay' => '',
+        'address' => '',
+   
 
     ];
 

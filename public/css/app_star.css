@@ -1,0 +1,146 @@
+
+/* Loader */
+#loader{
+    position:fixed;
+    top:0;
+    left:0;
+    background:rgba(255,255,255,0.5);
+    background-image: url(../images/loader.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+    z-index:2000;
+    width:100%;
+    height:100%;
+}
+.navbar-brand-wrapper{
+    background: #2c6d2b !important;
+}
+.sidebar{
+    background: linear-gradient(to top, #587757, #2c6d2b);
+}
+
+
+/* Input Uppercase */
+input[data-transform=uppercase] {
+    text-transform: uppercase;
+}
+
+
+#mid-vert{
+    vertical-align: middle;
+}
+
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/open-sans-v17-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Open Sans Regular'), local('OpenSans-Regular'),
+       url('/fonts/open-sans-v17-latin-regular.eot?#iefix') format('embedded-opentype'),
+       url('/fonts/open-sans-v17-latin-regular.woff2') format('woff2'),
+       url('/fonts/open-sans-v17-latin-regular.woff') format('woff'),
+       url('/fonts/open-sans-v17-latin-regular.ttf') format('truetype'),
+       url('/fonts/open-sans-v17-latin-regular.svg#OpenSans') format('svg');
+}
+
+
+body{
+    font-family: 'Open Sans', sans-serif;
+}
+
+.modal-content{
+  border-radius: 8px !important
+}
+
+
+
+div[data-notify="container"]{
+  width: 20% !important
+}
+
+
+div[data-notify="container"] > [data-notify="title"]{
+  display: block;
+  font-weight: bold !important
+}
+
+.loader{
+  text-align: center;
+}
+
+.action{
+  width: 100px !important;
+}
+
+
+.bs-wizard {margin-top: 40px;}
+
+/*Form Wizard*/
+.bs-wizard {border-bottom: solid 1px #e0e0e0; padding: 0 0 10px 0;}
+.bs-wizard > .bs-wizard-step {padding: 0; position: relative;}
+.bs-wizard > .bs-wizard-step + .bs-wizard-step {}
+.bs-wizard > .bs-wizard-step .bs-wizard-stepnum {color: #595959; font-size: 16px; margin-bottom: 5px;}
+.bs-wizard > .bs-wizard-step .bs-wizard-info {color: #999; font-size: 14px;}
+.bs-wizard > .bs-wizard-step > .bs-wizard-dot {position: absolute; width: 30px; height: 30px; display: block; background: #fbe8aa; top: 45px; left: 50%; margin-top: -15px; margin-left: -15px; border-radius: 50%;} 
+.bs-wizard > .bs-wizard-step > .bs-wizard-dot:after {content: ' '; width: 14px; height: 14px; background: #fbbd19; border-radius: 50px; position: absolute; top: 8px; left: 8px; } 
+.bs-wizard > .bs-wizard-step > .progress {position: relative; border-radius: 0px; height: 8px; box-shadow: none; margin: 20px 0;}
+.bs-wizard > .bs-wizard-step > .progress > .progress-bar {width:0px; box-shadow: none; background: #fbe8aa;}
+.bs-wizard > .bs-wizard-step.complete > .progress > .progress-bar {width:100%;}
+.bs-wizard > .bs-wizard-step.active > .progress > .progress-bar {width:50%;}
+.bs-wizard > .bs-wizard-step:first-child.active > .progress > .progress-bar {width:0%;}
+.bs-wizard > .bs-wizard-step:last-child.active > .progress > .progress-bar {width: 100%;}
+.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot {background-color: #f5f5f5;}
+.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot:after {opacity: 0;}
+.bs-wizard > .bs-wizard-step:first-child  > .progress {left: 50%; width: 50%;}
+.bs-wizard > .bs-wizard-step:last-child  > .progress {width: 50%;}
+.bs-wizard > .bs-wizard-step.disabled a.bs-wizard-dot{ pointer-events: none; }
+/*END Form Wizard*/
+
+.modal-xl{
+  width: 80%;
+}
+
+.kv-zoom-cache{
+    display:none;
+}
+
+.page-body-wrapper{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+.fileinput-remove{
+    padding-top: 6px !important;
+    padding-right: 6px !important;
+}
+
+.action_column{
+    width: 10%;
+}
+.table-muted{
+    background-color: lightgray;
+}
+.table-muted code{
+    color: black;
+}
+
+.file-preview-frame{
+    width: 23% !important;
+}
+
+.krajee-default.file-preview-frame .kv-file-content{
+    width: 100% !important;
+}
+
+.modal-backdrop.show {
+    opacity: 0.25 !important;
+}
+
+.modal-body{
+    padding: 10px !important;
+}
+
+.has-danger>label,.has-danger,.help-block {
+    color: red;
+}

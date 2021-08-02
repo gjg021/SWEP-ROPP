@@ -347,7 +347,49 @@ class __form{
 
     }
 
+    // New Form Helpers
 
+    public static function a_textbox($length, $label, $name, $type , $placeholder , $value, $attr, $class = null ){
+
+      if($class != null){
+        $fg_class = "fg-".$class;
+        $input_class = "input-".$class;
+      }else{
+        $fg_class = '';
+        $input_class = '';
+      }
+      return '<div class="form-group col-md-'.$length.' '.$fg_class.'" id="fg-'.$name.'">
+                <label for="'.$name.'">'.$label.'</label>
+                <input class="form-control '.$input_class.'" id="'.$name.'" name="'.$name.'" type="'.$type.'" value="'.$value.'" placeholder="'.$placeholder.'" '.$attr.'>
+              </div>';
+    }
+
+    public static function a_select($length, $label, $name, $array , $value, $attr, $class = null ){
+      if($class != null){
+        $fg_class = "fg-".$class;
+        $input_class = "input-".$class;
+      }else{
+        $fg_class = '';
+        $input_class = '';
+      }
+
+      $options = '';
+      foreach ($array as $option => $val) {
+        if($value === $val){
+          $options = $options.'<option value="'.$val.'" selected>'.$option.'</option>';
+        }else{
+          $options = $options.'<option value="'.$val.'">'.$option.'</option>';
+        }
+      }
+
+      return '<div class="form-group col-md-'.$length.' '.$fg_class.'" id="fg-'.$name.'">
+        <label for="is_menu">'.$label.'</label>
+        <select name="'.$name.'" class="form-control '.$input_class.'" '.$attr.'">
+          <option value="">Select</option>
+          '.$options.'
+        </select>  
+      </div>';
+    }
 
 
 }

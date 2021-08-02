@@ -45,7 +45,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => 'D:\swep_storage',
+            'root' => 'E:\swep_rd_storage\uploaded_documents',
         ],
         
         'public' => [

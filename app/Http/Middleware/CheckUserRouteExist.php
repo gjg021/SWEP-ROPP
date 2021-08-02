@@ -17,8 +17,8 @@ class CheckUserRouteExist{
 
     public function __construct(UserMenuInterface $user_menu_repo, UserSubmenuInterface $user_submenu_repo){
 
-        $this->user_menu_repo = $user_menu_repo;
-        $this->user_submenu_repo = $user_submenu_repo;
+        // $this->user_menu_repo = $user_menu_repo;
+        // $this->user_submenu_repo = $user_submenu_repo;
         
     }
   
@@ -33,7 +33,7 @@ class CheckUserRouteExist{
             return $next($request);
 
         }
-
+        return $next($request);
         return abort(404);
     
     }
