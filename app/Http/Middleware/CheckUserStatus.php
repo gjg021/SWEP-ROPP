@@ -20,7 +20,7 @@ class CheckUserStatus{
 
     public function __construct(){
 
-        $this->auth = auth();
+        $this->auth = auth('web');
         $this->session = session();
         
     }
@@ -30,13 +30,22 @@ class CheckUserStatus{
 
     public function handle($request, Closure $next){
 
-        if($this->auth->guard()->check()){
+        if(\Auth::guard('web')->check()){
 
-            if($this->auth->user()->is_active == false){
+            if($this->auth->user()->is_verified == 0){
 
                 $this->auth->logout();
                 $this->session->flush();
-                $this->session->flash('CHECK_NOT_ACTIVE', 'You have been DEACTIVATED! Please contact the designated IT Personel.');
+                $this->session->flash('CHECK_IF_VERIFIED', 'You have not yet verified your email address.');
+                return redirect('/');
+
+            }
+
+            if($this->auth->user()->is_active == 0){
+
+                $this->auth->logout();
+                $this->session->flush();
+                $this->session->flash('CHECK_IF_ACTIVATED', 'Your account is deactivated. Contact the administrator');
                 return redirect('/');
 
             }
@@ -47,7 +56,7 @@ class CheckUserStatus{
 
         $this->session->flush();
         $this->session->flash('CHECK_UNAUTHENTICATED', 'Please Sign in to start your session.');
-        return redirect('/'); 
+        return redirect('/');
     
     }
 

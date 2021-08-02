@@ -13,7 +13,7 @@ class RepositoryServiceProvider extends ServiceProvider {
 
 		$this->app->bind('App\Core\Interfaces\UserInterface', 'App\Core\Repositories\UserRepository');
 
-		$this->app->bind('App\Core\Interfaces\UserMenuInterface', 'App\Core\Repositories\UserMenuRepository');
+		$this->app->bind('App\Core\Interfaces\UserMenuInterface', 'App\Swep\Repositories\User\UserMenuRepository');
 
 		$this->app->bind('App\Core\Interfaces\UserSubmenuInterface', 'App\Core\Repositories\UserSubmenuRepository');
 
@@ -24,6 +24,23 @@ class RepositoryServiceProvider extends ServiceProvider {
 
 		$this->app->bind('App\Core\Interfaces\ProfileInterface', 'App\Core\Repositories\ProfileRepository');
 		
+
+		$this->app->bind('App\Swep\Interfaces\Admin\MenuInterface', 'App\Swep\Repositories\Admin\MenuRepository');
+
+		$this->app->bind('App\Swep\Interfaces\Admin\FunctionInterface', 'App\Swep\Repositories\Admin\FunctionRepository');
+
+		$this->app->bind('App\Swep\Interfaces\Admin\AdminInterface', 'App\Swep\Repositories\Admin\AdminRepository');
+
+		$this->app->bind('App\Swep\Interfaces\Admin\AdminFunctionsInterface', 'App\Swep\Repositories\Admin\AdminFunctionsRepository');
+
+
+		$this->app->bind('App\Swep\Interfaces\User\UserMenuInterface', 'App\Swep\Repositories\User\UserMenuRepository');
+
+		$this->app->bind('App\Swep\Interfaces\User\UserInterface', 'App\Swep\Repositories\User\UserRepository');
+
+        $this->app->bind('App\Swep\Interfaces\User\OrderOfPaymentInterface', 'App\Swep\Repositories\User\OrderOfPaymentRepository');
+
+
 	}
 
 

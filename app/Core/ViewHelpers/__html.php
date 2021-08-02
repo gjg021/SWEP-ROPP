@@ -228,6 +228,24 @@ class __html{
     }
 
 
+    public static function blank_modal($id, $size,$attr = ''){
+    	$img = asset('images/load_anim.gif');
+		 return '<div class="modal fade" id="'.$id.'" tabindex="-1" >
+			  <div class="modal-dialog modal-'.$size.'" '.$attr.'>
+			    <div class="modal-content">
+			    </div>
+			  </div>
+			</div>';
+    }
+
+    public static function modal_loader(){
+    	$img = asset('images/load_anim.gif');
+    	return '<div class="loader_container" hidden><div class="loader">
+			      	<img src="'.$img.'">
+			      </div></div>';
+    }
+
+
 
 
 }

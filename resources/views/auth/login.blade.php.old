@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>AdminLTE Template</title>
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  @include('layouts/css-plugins')
+  <style type="text/css">
+
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 600;
+	  src: url('/fonts/open-sans-v17-latin-regular.eot'); /* IE9 Compat Modes */
+	  src: local('Open Sans Regular'), local('OpenSans-Regular'),
+	       url('/fonts/open-sans-v17-latin-regular.eot?#iefix') format('embedded-opentype'),
+	       url('/fonts/open-sans-v17-latin-regular.woff2') format('woff2'),
+	       url('/fonts/open-sans-v17-latin-regular.woff') format('woff'),
+	       url('/fonts/open-sans-v17-latin-regular.ttf') format('truetype'),
+	       url('/fonts/open-sans-v17-latin-regular.svg#OpenSans') format('svg');
+	}
+
+
+	body{
+	    font-family: 'Open Sans', sans-serif;
+	}
+
+  </style>
+
+</head>
+
+<body class="hold-transition login-page" style="background-color: #ecf0f5; zoom:107%;">
+
+	<div class="login-box">
+	  <div class="login-logo">
+	    <span style="font-size: 35px;">SWEP RD ONLINE PAYMENT</span>
+	  </div>
+
+		@if(Session::has('AUTH_AUTHENTICATED'))
+			{!! __html::alert('danger', '<i class="icon fa fa-ban"></i> Oops!', Session::get('AUTH_AUTHENTICATED')) !!}
+		@endif
+
+		@if(Session::has('CHECK_IF_VERIFIED'))
+			{!! __html::alert('warning', '<i class="icon fa fa-ban"></i> Oops!', Session::get('CHECK_IF_VERIFIED')) !!}
+		@endif
+
+		@if(Session::has('CHECK_IF_ACTIVATED'))
+			{!! __html::alert('warning', '<i class="icon fa fa-ban"></i> Oops!', Session::get('CHECK_IF_ACTIVATED')) !!}
+		@endif
+
+		@if(Session::has('VERIFIED_EMAIL'))
+			{!! __html::alert('success', '<i class="icon fa fa-check"></i> Verified!', Session::get('VERIFIED_EMAIL')) !!}
+		@endif
+
+
+
+		@if(Session::has('AUTH_UNACTIVATED'))
+			{!! __html::alert('danger', '<i class="icon fa fa-ban"></i> Oops!', Session::get('AUTH_UNACTIVATED')) !!}
+		@endif
+
+		@if(Session::has('CHECK_UNAUTHENTICATED'))
+			{!! __html::alert('danger', '<i class="icon fa fa-ban"></i> Oops!', Session::get('CHECK_UNAUTHENTICATED')) !!}
+		@endif
+
+		@if(Session::has('CHECK_NOT_LOGGED_IN'))
+			{!! __html::alert('danger', '<i class="icon fa fa-ban"></i> Oops!', Session::get('CHECK_NOT_LOGGED_IN')) !!}
+		@endif
+
+		@if(Session::has('CHECK_NOT_ACTIVE'))
+			{!! __html::alert('danger', '<i class="icon fa fa-ban"></i> Oops!', Session::get('CHECK_NOT_ACTIVE')) !!}
+		@endif
+
+		@if(Session::has('PROFILE_UPDATE_USERNAME_SUCCESS'))
+			{!! __html::alert('success', '<i class="icon fa fa-check"></i> Success!', Session::get('PROFILE_UPDATE_USERNAME_SUCCESS')) !!}
+		@endif
+
+		@if(Session::has('PROFILE_UPDATE_PASSWORD_SUCCESS'))
+			{!! __html::alert('success', '<i class="icon fa fa-check"></i> Success!', Session::get('PROFILE_UPDATE_PASSWORD_SUCCESS')) !!}
+		@endif
+
+		@if(Session::has('LOGOUT_SUCCESS'))
+			{!! __html::alert('success', '<i class="icon fa fa-check"></i> Success!', Session::get('LOGOUT_SUCCESS')) !!}
+		@endif
+
+		<div class="login-box-body">
+			<p class="login-box-msg">Sign in to start your session</p>
+
+			<form method="POST" action="{{ route('auth.login') }}">
+
+			  	@csrf
+
+			  	<div class="form-group {{ $errors->has('username') ? ' has-error' : '' }} has-feedback">
+			    	<input class="form-control is-invalid" name="email" id="username" placeholder="Email address" type="text" value="{{ __sanitize::html_attribute_encode(old('username')) }}">
+			    	<span class="glyphicon glyphicon-user form-control-feedback"></span>
+					@if ($errors->has('username'))
+						<span class="help-block"> {{ $errors->first('username') }} </span>
+					@endif
+			  	</div>
+
+
+			  	<div class="form-group {{ $errors->has('password') ? ' has-error' : '' }} has-feedback">
+			    	<input class="form-control" name="password" placeholder="Password" type="password">
+			    	<span class="glyphicon glyphicon-lock form-control-feedback"></span>
+					@if ($errors->has('password'))
+						<span class="help-block">{{ $errors->first('password') }}</span>
+					@endif
+			  	</div>
+
+			    <div class="social-auth-links text-center">
+			      <button type="submit" class="btn btn-block btn-flat btn-success">LOGIN</button>
+			    </div>
+
+			</form>
+			<p><a href="#sign_up_modal" data-target="#sign_up_modal" data-toggle="modal">Don't have an account? Click here to sign up.</a></p>
+
+			<br>
+
+		</div>
+
+	</div>
+
+
+
+	<div class="modal fade" id="sign_up_modal" tabindex="-1" role="dialog" aria-labelledby="">
+	  <div class="modal-dialog" role="document">
+	  	<form id="sign_up_form">
+	  		@csrf
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="">Sign up</h4>
+		      </div>
+		      <div class="modal-body">
+		        <div class="form-container">
+		        	<p  class="text-info"> Having an account helps you track your transactions and payments.
+			        <br>
+			        <code>Fields marked with asterisks(*) are required.</code>
+			    	</p>
+
+
+			        <div class="row">
+			        	{!! __form::a_textbox( 4,'First Name:*','first_name', 'text', 'First Name','', '')!!}
+			        	{!! __form::a_textbox( 4,'Middle Name:*','middle_name', 'text', 'Middle Name','', '')!!}
+			        	{!! __form::a_textbox( 4,'Last Name:*','last_name', 'text', 'Last Name','', '')!!}
+			        </div>
+			        <div class="row">
+			        	{!! __form::a_select(4, 'Sex:*', 'sex', ['Male' => 'M', 'Female' => 'F','Prefer not to say' => 'P'], '' , '') !!}
+
+			        	{!! __form::a_textbox( 4,'Birthday:*','birthday', 'date', 'Last Name','', '')!!}
+
+			        	{!! __form::a_textbox( 4,'Contact number:*','phone', 'text', 'Contact number','', '')!!}
+			        </div>
+			        <p>Address</p>
+			        <div class="row">
+			        	{!! __form::a_select('4', 'Region:*', 'region', [], '' , '') !!}
+			        	{!! __form::a_select('4', 'Province:*', 'province', [], '' , '') !!}
+			        	{!! __form::a_select('4', 'Municipality/City:*', 'municipality', [], '' , '') !!}
+			        </div>
+			        <div class="row">
+
+
+			        	{!! __form::a_select('4', 'Barangay:*', 'barangay', [], '' , '') !!}
+			        	{!! __form::a_textbox( 8,'Detailed address:*','address', 'text', 'Lot, Block, Street','', '')!!}
+			        </div>
+
+			        <p>Account</p>
+			        <div class="row">
+			        	{!! __form::a_textbox( 6,'Username:*','username', 'text', 'Username','', '')!!}
+
+			        	{!! __form::a_textbox( 6,'Email Address:*','email', 'text', 'Email Address','', '')!!}
+			        </div>
+			        <div class="row">
+			        	{!! __form::a_textbox( 6,'Password:*','password', 'password', 'Password','', '')!!}
+
+			        	{!! __form::a_textbox( 6,'Confirm Password:*','password_confirmation', 'password', 'Confirm Password','', '')!!}
+			        </div>
+		        </div>
+		        <div class="wizard-container" hidden="">
+		        	<div class="row bs-wizard" style="border-bottom:0; margin-bottom:40px ">
+
+	                <div class="col-xs-4 bs-wizard-step complete">
+	                  <div class="text-center bs-wizard-stepnum"><i class="fa fa-check text-success"></i></div>
+	                  <div class="progress"><div class="progress-bar"></div></div>
+	                  <a href="#" class="bs-wizard-dot"></a>
+	                  	<div class="bs-wizard-info text-center">
+	                  		{{-- <span style="font-size: 25px" class="text-success"><i class="fa fa-check"></i></span>
+	                  		<br> --}}
+	                  		Fill out sign up form.
+	              		</div>
+	                </div>
+
+	                <div class="col-xs-4 bs-wizard-step disabled"><!-- complete -->
+	                  <div class="text-center bs-wizard-stepnum">Verification</div>
+	                  <div class="progress"><div class="progress-bar"></div></div>
+	                  <a href="#" class="bs-wizard-dot"></a>
+	                  <div class="bs-wizard-info text-center">Click the verification link that we sent to your email.</div>
+	                </div>
+
+	                <div class="col-xs-4 bs-wizard-step disabled"><!-- active -->
+	                  <div class="text-center bs-wizard-stepnum">Login</div>
+	                  <div class="progress"><div class="progress-bar"></div></div>
+	                  <a href="#" class="bs-wizard-dot"></a>
+	                  <div class="bs-wizard-info text-center"> Login to your account.</div>
+	                </div>
+
+	            </div>
+		        </div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Sign up</button>
+		      </div>
+		    </div>
+	  	</form>
+	  </div>
+	</div>
+
+
+
+	@include('layouts.js-plugins')
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var regions;
+			$.getJSON('{{asset("regions.json")}}', function(data){
+				regions = data;
+				$.each(data, function(i, item){
+					$("select[name='region']").append('<option value="'+i+'">'+item.region_name+'</option>');
+				})
+			})
+			html_region = $("select[name='region']");
+			html_province = $("select[name='province']");
+			html_municipality = $("select[name='municipality']");
+			html_barangay = $("select[name='barangay']");
+
+			html_region.change(function(){
+				selected = $(this).val();
+				html_province.html('<option value="">Select</option>');
+				html_municipality.html('<option value="">Select</option>');
+				html_barangay.html('<option value="">Select</option>');
+
+				$.each(regions[selected]['province_list'], function(i,item){
+					html_province.append('<option value="'+i+'">'+i+'</option>');
+				})
+			})
+
+			html_province.change(function(){
+				selected = $(this).val();
+				html_municipality.html('<option value="">Select</option>');
+				html_barangay.html('<option value="">Select</option>');
+
+				$.each(regions[html_region.val()]['province_list'][selected]['municipality_list'], function(i,item){
+					html_municipality.append('<option value="'+i+'">'+i+'</option>');
+				});
+
+			});
+
+			html_municipality.change(function(){
+				selected = $(this).val();
+				html_barangay.html('<option value="">Select</option>');
+				$.each(regions[html_region.val()]['province_list'][html_province.val()]['municipality_list'][selected]['barangay_list'], function(i,item){
+					html_barangay.append('<option value="'+item+'">'+item+'</option>');
+				})
+			})
+
+		})
+
+		$("#sign_up_form").submit(function(e){
+			e.preventDefault()
+			form = $(this);
+			formdata = form.serialize();
+			loading_btn(form);
+			$.ajax({
+				url: '{{route("auth.signup")}}',
+				type:'POST',app
+				data: formdata,
+				success: function(response){
+					if(response == 1){
+						remove_loading_btn(form);
+						//$("#sign_up_modal").modal('hide');
+						$.confirm({
+                            title: 'Email Verification Sent!',
+                            icon: 'fa fa-envelope',
+                            type: 'green',
+                            content: 'A link was sent to your email address. Please click that link to activate your account.',
+                            buttons: {
+                            	OK: {
+						            text: 'OK',
+						            btnClass: 'btn-blue',
+						            keys: ['enter', 'shift'],
+						            action: function(){
+						            	$("#sign_up_modal .modal-footer").hide();
+						            	$("#sign_up_modal .modal-title").hide();
+						            	$(".wizard-container").slideDown();
+						                $(".form-container").slideUp();
+						            }
+						        }
+                            }
+                        });
+					}
+				},
+				error: function(response){
+					errored(form,response);
+				}
+			})
+		})
+	</script>
+</body>
+</html>

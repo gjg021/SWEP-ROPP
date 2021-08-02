@@ -63,5 +63,6 @@ class Kernel extends HttpKernel
         /** Custom MIDDLEWARE **/
         'check.user_status' => \App\Http\Middleware\CheckUserStatus::class,
         'check.user_route' => \App\Http\Middleware\CheckUserRouteExist::class,
+        'check.admin_route' => \App\Http\Middleware\CheckAdminRouteExist::class,
     ];
 }

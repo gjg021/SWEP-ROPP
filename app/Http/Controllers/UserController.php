@@ -24,16 +24,9 @@ class UserController extends Controller{
     protected $submenu_repo;
 
 
-    public function __construct(UserInterface $user_repo, UserMenuInterface $user_menu_repo, UserSubmenuInterface $user_submenu_repo, MenuInterface $menu_repo, SubmenuInterface $submenu_repo){
+    public function __construct(){
 
-        $this->user_repo = $user_repo;
-        $this->user_menu_repo = $user_menu_repo;
-        $this->user_submenu_repo = $user_submenu_repo;
-        $this->menu_repo = $menu_repo;
-        $this->submenu_repo = $submenu_repo;
-
-        parent::__construct();
-
+       
     }
 
 
