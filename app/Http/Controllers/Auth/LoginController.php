@@ -15,8 +15,6 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 
 class LoginController extends Controller{
-   
-
     use AuthenticatesUsers;
 
     protected $user_repo;
@@ -29,12 +27,7 @@ class LoginController extends Controller{
     protected $maxAttempts = 4;
     protected $decayMinutes = 2;
 
-
-
-
-
     public function __construct(UserInterface $user_repo, __cache $__cache){
-
 
         $this->user_repo = $user_repo;
 
@@ -46,21 +39,11 @@ class LoginController extends Controller{
 
     }
 
-
-
-
-
-    
     public function username(){
 
         return 'email';
     
     }
-
-
-
-
-
 
     protected function login(Request $request){
         $this->validateLogin($request);
@@ -99,11 +82,6 @@ class LoginController extends Controller{
 
     }
 
-
-
-
-
-
     public function logout(Request $request){
         
         if($request->isMethod('get')){
@@ -127,13 +105,5 @@ class LoginController extends Controller{
         return abort(404);
 
     }
-
-
-
-
-
-
-
-
 
 }

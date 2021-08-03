@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\PaymentFormRequest;
 use App\Models\Settings;
+use App\Models\User\LabAnalysis;
 use App\Models\User\OrderOfPayments;
 use App\Models\User\SupportingDocuments;
 use App\Models\User\TransactionType;
@@ -25,14 +26,28 @@ class PaymentController extends Controller
         if(!empty($transaction_type_db)){
             foreach ($transaction_type_db as $transaction_type_db){
                 $transaction_types[$transaction_type_db->group][$transaction_type_db->transaction_code] = [
+                    'transaction_code' => $transaction_type_db->transaction_code,
                     'transaction_type' => $transaction_type_db->transaction_type,
                     'type' => $transaction_type_db->type,
                     'amount' => $transaction_type_db->amount,
                 ];
             }
         }
+
+        $lab_analysis_db = LabAnalysis::get()->where('user_slug', '=', $this->auth->guard('web')->user()->slug);
+        $lab_analysis = [];
+        if(!empty($lab_analysis_db)){
+            foreach($lab_analysis_db as $lab_analysis_db){
+                $lab_analysis[$lab_analysis_db->slug] = [
+                    'slug' => $lab_analysis_db->slug,
+                    'user_slug' => $lab_analysis_db->user_slug,
+                    'product_description' => $lab_analysis_db->product_description,
+                    'sucrose' => $lab_analysis_db->sucrose,
+                ];
+            }
+        }
         //return $transaction_types;
-        return view('dashboard.payment.create')->with(['transaction_types' => $transaction_types]);
+        return view('dashboard.payment.create')->with(['transaction_types' => $transaction_types, 'lab_analysis' => $lab_analysis]);
     }
 
     public function validateForm(){

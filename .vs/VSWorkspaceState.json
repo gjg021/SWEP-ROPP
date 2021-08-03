@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\Core",
+    "\\app\\Core\\Repositories"
+  ],
+  "SelectedNode": "\\app\\Core\\Repositories\\UserRepository.php",
+  "PreviewInSolutionExplorer": false
+}

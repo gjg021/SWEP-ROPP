@@ -19,13 +19,8 @@ use App\Core\Helpers\__dataType;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Filesystem\FilesystemManager as Storage;
 
-
-
 class Controller extends BaseController{
-
-
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
 
     protected $auth;
     protected $session;
@@ -36,9 +31,8 @@ class Controller extends BaseController{
     protected $event;
     protected $storage;
 
-
     public function __construct(){
-        
+
         $this->auth = auth();
         $this->session = session();
         $this->carbon = App::make(Carbon::class);
@@ -50,7 +44,4 @@ class Controller extends BaseController{
         $this->storage = App::make(Storage::class);
         
     }
-
-
-
 }

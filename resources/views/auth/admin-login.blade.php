@@ -15,7 +15,6 @@
   <link rel="stylesheet" href="{{ asset('template/dist/css/AdminLTE.min.css') }}">
 
   <style type="text/css">
-  	\
 	@font-face {
 	  font-family: 'Open Sans';
 	  font-style: normal;

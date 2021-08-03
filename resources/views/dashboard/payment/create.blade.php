@@ -6,7 +6,7 @@
     <div class="row page-title-header">
         <div class="col-12">
             <div class="page-header">
-                <h4 class="page-title">Pay</h4>
+                <h4 class="page-title">Payment</h4>
             </div>
         </div>
     </div>
@@ -14,10 +14,9 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <div class="row justify-content-center">
+                    <div class="row justify-content">
                         <div class="col-md-6">
                             <div class="card-title">
-                                <h4> Payment</h4>
                                 <form id="order_of_payment_form">
                                     <br>
                                     @csrf
@@ -29,45 +28,43 @@
                                                 @foreach($transaction_types as $key => $group)
                                                     <optgroup label="{{$key}}">
                                                         @foreach($group as $key2 => $trasaction_type)
-                                                            <option value="{{$key2}}" type="{{$trasaction_type['type']}}" amount="{{$trasaction_type['amount']}}">{{$trasaction_type['transaction_type']}}</option>
+                                                            <option transactionCode="{{$trasaction_type['transaction_code']}}" value="{{$key2}}" type="{{$trasaction_type['type']}}" amount="{{$trasaction_type['amount']}}">{{$trasaction_type['transaction_type']}}</option>
                                                         @endforeach
                                                     </optgroup>
                                                 @endforeach
                                             @endif
-
                                         </select>
+                                    </div>
+                                    <div id="divLabAnalysis">
+
+                                    </div>
+
+                                    <div id="amountString">
                                     </div>
 {{--                                    <div class="form-group">--}}
 {{--                                        <label>Volume (Lkg/tc)</label>--}}
 {{--                                        <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume"> x multiplier--}}
 {{--                                    </div>--}}
-                                    <div id="amount_container" style="display: none" class="dynamics">
-                                        <div class="form-group">
-                                            <label>Amount: </label>
-                                            <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
-                                        </div>
-                                    </div>
 
-                                    <div id="volume_container" style="display: none" class="dynamics">
-                                        <div class="form-group">
-                                            <label>Volume (Lkg/tc)</label>
-                                            <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume">
+                                        <div id="amount_container" style="display: none" class="dynamics">
+                                            <div class="form-group">
+                                                <label>Amount: </label>
+                                                <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
+                                            </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Amount: </label>
-                                            <input type="text" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
+                                        <div id="volume_container" style="display: none" class="dynamics">
+                                            <div class="form-group">
+                                                <label>Volume (Lkg/tc)</label>
+                                                <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Amount: </label>
+                                                <input type="text" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary float-right"><i class="fa fa-caret-right"></i> Proceed</button>
+                                        <button type="submit" class="btn btn-primary center"><i class="fa fa-caret-right"></i> Proceed</button>
                                 </form>
-
-                                <div class="text-center">
-                                    <br><br>
-                                    <img src="{{asset('images/payment_methods/i_access.png')}}" width="200">
-
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -85,6 +82,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('modals')
@@ -133,6 +131,8 @@
             var option = $("#transaction_type option[value='"+t.val()+"']");
             var type = option.attr('type');
             var amount = option.attr('amount');
+            var stringAmount = type!='user'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+            $("#amountString").html(stringAmount);
             $(".dynamics input").each(function () {
                 $(this).val('');
             })
@@ -140,12 +140,27 @@
                 $(this).slideUp();
             })
 
-
             if(type == 'volume'){
                 $("#volume_container").slideDown();
             }if(type == 'user'){
                 $("#amount_container").slideDown();
             }
+
+            var stringLabAnalysis = "";
+            if(option.attr('transactionCode') == 'PRE'){
+                stringLabAnalysis = "<div class='form-group'>";
+                stringLabAnalysis += "<label>Product</label>";
+                stringLabAnalysis += "<select class='form-control form-control-lg' name='LabAnalysis' id='LabAnalysis'>";
+                stringLabAnalysis += "<option disabled='' selected>--Please select--</option>";
+                stringLabAnalysis += "@if(count($lab_analysis)> 0)";
+                stringLabAnalysis += "@foreach($lab_analysis as $key1 => $slug)";
+                stringLabAnalysis += "<option value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
+                stringLabAnalysis += "@endforeach";
+                    stringLabAnalysis += "@endif";
+                    stringLabAnalysis += "</select>";
+                stringLabAnalysis += "</div>";
+            }
+            $("#divLabAnalysis").html(stringLabAnalysis);
         })
 
         $("#volume_container input[name='volume']").keyup(function () {
@@ -177,8 +192,5 @@
                 }
             })
         })
-
-
-
     </script>
 @endsection
