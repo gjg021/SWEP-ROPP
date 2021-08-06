@@ -15,7 +15,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="row justify-content">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="card-title">
                                 <form id="order_of_payment_form">
                                     <br>
@@ -36,9 +36,7 @@
                                         </select>
                                     </div>
                                     <div id="divLabAnalysis">
-
                                     </div>
-
                                     <div id="amountString">
                                     </div>
 {{--                                    <div class="form-group">--}}
@@ -60,7 +58,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Amount: </label>
-                                                <input type="text" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
+                                                <input type="text" name="volume_amount" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary center"><i class="fa fa-caret-right"></i> Proceed</button>
@@ -123,7 +121,6 @@
 
             })
         }, 500));
-
         new AutoNumeric("#amount",autonum_settings);
 
         $("#transaction_type").change(function(){
@@ -150,14 +147,14 @@
             if(option.attr('transactionCode') == 'PRE'){
                 stringLabAnalysis = "<div class='form-group'>";
                 stringLabAnalysis += "<label>Product</label>";
-                stringLabAnalysis += "<select class='form-control form-control-lg' name='LabAnalysis' id='LabAnalysis'>";
+                stringLabAnalysis += "<select class='form-control form-control-lg' name='LabAnalysisName' id='LabAnalysis'>";
                 stringLabAnalysis += "<option disabled='' selected>--Please select--</option>";
                 stringLabAnalysis += "@if(count($lab_analysis)> 0)";
                 stringLabAnalysis += "@foreach($lab_analysis as $key1 => $slug)";
-                stringLabAnalysis += "<option value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
+                stringLabAnalysis += "<option id='suc{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
                 stringLabAnalysis += "@endforeach";
-                    stringLabAnalysis += "@endif";
-                    stringLabAnalysis += "</select>";
+                stringLabAnalysis += "@endif";
+                stringLabAnalysis += "</select>";
                 stringLabAnalysis += "</div>";
             }
             $("#divLabAnalysis").html(stringLabAnalysis);
@@ -166,8 +163,24 @@
         $("#volume_container input[name='volume']").keyup(function () {
             var t = $("#transaction_type");
             var option = $("#transaction_type option[value='"+t.val()+"']");
-            $("#volume_amount").val($(this).val()*option.attr('amount'));
-            new AutoNumeric("#volume_amount",autonum_settings);
+            if(option.attr('transactionCode') == 'PRE'){
+                var r = $("#LabAnalysis");
+                var option1 = $("#LabAnalysis option[id='suc"+r.val()+"']");
+                var sucCont = option1.attr('sucrose');
+                if(sucCont<=65){
+                    $("#volume_amount").val($(this).val()*11.90);
+                    new AutoNumeric("#volume_amount",autonum_settings);
+                }
+                else if (sucCont>65) {
+                    $("#volume_amount").val($(this).val()*37.75);
+                    new AutoNumeric("#volume_amount",autonum_settings);
+                }
+            }
+            else {
+                $("#volume_amount").val($(this).val()*option.attr('amount'));
+                new AutoNumeric("#volume_amount",autonum_settings);
+            }
+
         })
 
         $("#order_of_payment_form").submit(function(e){

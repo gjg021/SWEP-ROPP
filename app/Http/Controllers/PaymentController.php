@@ -10,6 +10,7 @@ use App\Models\User\LabAnalysis;
 use App\Models\User\OrderOfPayments;
 use App\Models\User\SupportingDocuments;
 use App\Models\User\TransactionType;
+use App\Swep\Repositories\User\LabAnalysisRepository;
 use Carbon\Carbon;
 use File;
 use Illuminate\Http\Request;
@@ -20,6 +21,13 @@ use Yajra\DataTables\Facades\DataTables;
 
 class PaymentController extends Controller
 {
+    protected $labAnalysisRepo;
+    public function __construct(LabAnalysisRepository $labAnalysisRepo)
+    {
+        $this->labAnalysisRepo = $labAnalysisRepo;
+        parent::__construct();
+    }
+
     public function create(){
         $transaction_type_db = TransactionType::get();
         $transaction_types = [];
@@ -51,8 +59,6 @@ class PaymentController extends Controller
     }
 
     public function validateForm(){
-
-
         $request = request();
         $status_code = 404;
         $errors = [];
@@ -104,12 +110,16 @@ class PaymentController extends Controller
     }
 
     public function review(Request $request){
-
+        $labAnalysisSlug = $request->LabAnalysisName;
+        $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
         $payment_method = 'Landbank LinkBiz Portal';
-        $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount);
+        $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$labAnalysisSlug);
 
         $response = collect();
+        if(!empty($labAnalysisRepo)){
+            $response->product = $labAnalysisRepo->product_description;
+        }
         $response->transaction_type = $request->transaction_type;
         $response->amount = $amount;
         $response->payment_method = $payment_method;
@@ -191,26 +201,21 @@ class PaymentController extends Controller
     }
 
     public function store(PaymentFormRequest $request){
-
-
-
-
         if(!$request->has('transaction_code') || $request->transaction_code == null){
             return [
                 'error' => "Invalid Transaction1",
             ];
         }else{
-
             $transaction_code = $request->transaction_code;
             $user_id = Auth::guard('web')->user()->slug;
             $payment_method = 'Landbank LinkBiz Portal';
-            if($this->amountComputer($transaction_code,$request->volume,$request->amount) == 'invalid'){
+            /*if($this->amountComputer($transaction_code,$request->volume,$request->amount,$request->LabAnalysisName) == 'invalid'){
                 return response()->json([
                     'error' => "Invalid Computation",
                 ],419);
             }else{
-                $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount);
-            }
+                $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$request->LabAnalysisName);
+            }*/
 
             $transaction_type_db = TransactionType::where('transaction_code',$transaction_code)->first();
 
@@ -225,7 +230,7 @@ class PaymentController extends Controller
                 $payment = New OrderOfPayments;
                 $payment->transaction_type = $transaction_type_db->transaction_type;
                 $payment->payment_method = $payment_method;
-                $payment->amount = $amount;
+                $payment->amount = $request->amount;
                 $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5).rand(1000,9999)))).'-'.date('my');
                 $payment->user_created = Auth::guard('web')->user()->slug;
                 $payment->expires_on = Carbon::now()->addDays(3);
@@ -247,6 +252,7 @@ class PaymentController extends Controller
                     return [
                         'status' => 1,
                         'transaction_id' => $payment->slug,
+                        'amount' => $payment->amount,
                         'timestamp'=> date('M d, Y | h:i:A',strtotime($payment->created_at))
                     ];
                 }
@@ -299,13 +305,24 @@ class PaymentController extends Controller
         return $val;
     }
 
-    private function amountComputer($code,$volume,$amount){
+    private function amountComputer($code,$volume,$amount,$labAnalysisSlug){
         $transaction_type_db = TransactionType::where('transaction_code',$code)->first();
+        $lab_analysis_db = LabAnalysis::where('slug',$labAnalysisSlug)->first();
         if(empty($transaction_type_db)){
             return 'invalid';
         }else{
             if($transaction_type_db->type == 'volume'){
-                $amount = $volume*$transaction_type_db->amount;
+                if($transaction_type_db->transaction_code == 'PRE'){
+                    if($lab_analysis_db->sucrose<=65){
+                        $amount = $volume*11.90;
+                    }
+                    else if ($lab_analysis_db->sucrose>65) {
+                        $amount = $volume*37.75;
+                    }
+                }
+                else {
+                    $amount = $volume*$transaction_type_db->amount;
+                }
             }
             if($transaction_type_db->type == 'static'){
                 $amount = $transaction_type_db->amount;

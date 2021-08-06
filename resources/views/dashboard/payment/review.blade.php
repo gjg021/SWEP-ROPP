@@ -20,39 +20,45 @@
                     <div id="done" class="text-center" style="padding-bottom: 50px; display: none">
                         <h4>Transaction ID:</h4>
                         <h2><code id="transaction_id"></code></h2>
+                        <h4 id="amountToPay"></h4>
                         <h5 id="timestamp"></h5>
                         <img  width="600" src="{{asset('images/payment.gif')}}" style="margin-bottom: 30px">
                         <h4>We are redirecting you to the {{$response->payment_method}}</h4>
                     </div>
                     <div id="content">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6">
-                                <h4> Payment</h4>
+                        <div class="row justify-content">
+                            <div class="col-md-12">
+                                <h4> Summary</h4>
 
                                 <table class="table mt-5 mb-5">
                                     <tbody>
-
                                     <tr>
-                                        <td>Transaction Type:</td>
+                                        <td width="25%">Transaction Type</td>
+                                        <td width="5%">:</td>
                                         <td>{{$response->transaction_type}}</td>
                                     </tr>
+                                    @if(!empty($response->product))
+                                        <tr>
+                                            <td width="25%">Product</td>
+                                            <td width="5%">:</td>
+                                            <td>{{$response->product}}</td>
+                                        </tr>
+                                    @endif
                                     @if(!empty($response->volume))
                                         <tr>
-                                            <td>Volume:</td>
+                                            <td width="25%">Volume</td>
+                                            <td width="5%">:</td>
                                             <td>{{$response->volume}} Lkg/tc</td>
                                         </tr>
                                     @endif
-
-
                                     <tr>
-                                        <td>Payment method:</td>
+                                        <td width="25%">Payment method</td>
+                                        <td width="5%">:</td>
                                         <td>{{$response->payment_method}}</td>
                                     </tr>
-
-
-
                                     <tr>
-                                        <td style="font-size: larger; font-weight: 600">Amount:</td>
+                                        <td width="25%" style="font-size: larger; font-weight: 600">Amount</td>
+                                        <td width="5%">:</td>
                                         <td style="font-size: larger; font-weight: 600" class="font-weight-bold">{{number_format($response->amount,2)}}</td>
                                     </tr>
 
@@ -60,6 +66,8 @@
                                 </table>
 
                             </div>
+                        </div>
+                        <div class="row justify-content-center">
                             <p class="text-danger">LandBank LinkBiz Portal imposes service fee on top of the total amount to be paid.</p>
                         </div>
                         <hr>
@@ -103,12 +111,54 @@
         </div>
     </div>
 
+    <div id="pay_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="margin-top: 100px">
+                <form id="pay_modal_form">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><code>LandBank LinkBiz Portal</code></h5>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <td>Transaction Type:</td>
+                                <td>{{$response->transaction_type}}</td>
+                            </tr>
+                            @if(!empty($response->product))
+                                <tr>
+                                    <td>Product:</td>
+                                    <td>{{$response->product}}</td>
+                                </tr>
+                            @endif
+                            @if(!empty($response->volume))
+                                <tr>
+                                    <td>Volume:</td>
+                                    <td>{{$response->volume}} Lkg/tc</td>
+                                </tr>
+                            @endif
+                            <tr>
+                                <td>Payment method:</td>
+                                <td>{{$response->payment_method}}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: larger; font-weight: 600">Amount:</td>
+                                <td style="font-size: larger; font-weight: 600" class="font-weight-bold">{{number_format($response->amount,2)}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 <script type="text/javascript">
     $(document).ready(function(){
-
-
         uploader = $("#input-100").fileinput({
             uploadUrl: "{{route('dashboard.payments.store')}}",
             enableResumableUpload: false,
@@ -161,7 +211,10 @@
         }).on('filebatchuploadsuccess', function(event, data) {
             console.log(data.response);
             $("#transaction_id").html(data.response.transaction_id);
+            $("#amountToPay").html("Amount to Pay: Php "+data.response.amount);
             $("#timestamp").html(data.response.timestamp);
+            $('#pay_modal').modal('show');
+
             setTimeout(function(){
                 $("#done").slideDown();
                 $("#content").slideUp();

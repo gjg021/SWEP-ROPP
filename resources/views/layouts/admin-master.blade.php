@@ -6,6 +6,17 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>SWEP | Online Payment</title>
   @include('layouts.css-plugins')
+  <style>
+    .navbar-brand-wrapper{
+      background: #fff !important;
+    }
+    .sidebar{
+      background: linear-gradient(to top, #fff, #fff);
+    }
+    .sidebar > .nav:not(.sub-menu) > .nav-item:hover:not(.nav-profile):not(.hover-open) > .nav-link:not([aria-expanded="true"]) {
+      background: #2196f3;
+    }
+  </style>
 
 </head>
 <body>

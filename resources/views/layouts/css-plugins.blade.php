@@ -1,5 +1,4 @@
 
-
 <link rel="icon" href="{{asset('images/sra_logo_sm.png')}}">
 <link rel="stylesheet" href="{{asset('template/staradmin/src/assets/vendors/iconfonts/mdi/css/materialdesignicons.min.css')}}">
 <link rel="stylesheet" href="{{asset('template/staradmin/src/assets/vendors/iconfonts/ionicons/dist/css/ionicons.css')}}">

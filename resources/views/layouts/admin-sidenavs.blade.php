@@ -1,3 +1,4 @@
+
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav">
         <li class="nav-item nav-profile">
@@ -7,38 +8,35 @@
                     <div class="dot-indicator bg-success"></div>
                 </div>
                 <div class="text-wrapper">
-                    <p class="profile-name">{{Auth::guard('web')->user()->first_name}} {{Auth::guard('web')->user()->last_name}}</p>
-                    <p class="designation">Premium user</p>
+                    <p class="profile-name" style="color: #5a5a5a">{{Auth::guard('web')->user()->first_name}} {{Auth::guard('web')->user()->last_name}}</p>
+                    <p class="designation" style="color: #5a5a5a">Premium user</p>
                 </div>
             </a>
         </li>
-        <li class="nav-item nav-category">Main Menu</li>
         <li class="nav-item">
             <a class="nav-link" href="{{route('dashboard.home')}}">
                 <i class="menu-icon typcn typcn-document-text"></i>
-                <span class="menu-title">Dashboard</span>
+                <span class="menu-title" style="color: #5a5a5a; font-size: 13px;">Dashboard</span>
             </a>
         </li>
 
         @if(count($global_user_menus) > 0)
             @foreach($global_user_menus as $key => $label)
-                <li class="nav-item nav-category">{{$key}}</li>
-
                 @foreach($label as $menu)
                     @if($menu['menu_obj']->is_dropdown == 1)
-                        <li class="nav-item">
+                        <li class="nav-item" style="color: #5a5a5a">
                             <a class="nav-link" data-toggle="collapse" href="#{{$menu['menu_obj']->slug}}" aria-expanded="false" aria-controls="{{$menu['menu_obj']->slug}}">
 {{--                                <i class="fa {{$menu['menu_obj']->icon}}"></i>--}}
-                                <span class="menu-title">{{$menu['menu_obj']->menu_name}}</span>
-                                <i class="menu-arrow"></i>
+                                <span class="menu-title" style="color: #5a5a5a; font-size: 13px;">{{$menu['menu_obj']->menu_name}}</span>
+                                <i class="menu-arrow" style="color: #5a5a5a"></i>
                             </a>
                             <div class="collapse" id="{{$menu['menu_obj']->slug}}">
                                 @if(count($menu['functions']) > 0)
                                     <ul class="nav flex-column sub-menu">
                                         @foreach($menu['functions'] as $function)
                                             @if($function['function_obj']->function_is_nav == 1)
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="{{route($function['function_obj']->function_route)}}">
+                                                <li class="nav-item" style="color: #5a5a5a">
+                                                    <a class="nav-link" style="color: #5a5a5a"  href="{{route($function['function_obj']->function_route)}}">
 {{--                                                        <i class="{{$function['function_obj']->function_icon != '' ? $function['function_obj']->function_icon : 'fa fa-chevron-right'}}"></i>--}}
                                                         {{$function['function_obj']->function_label}}
                                                     </a>
@@ -60,7 +58,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{route('dashboard.home')}}">
                                 <i class="menu-icon typcn typcn-document-text"></i>
-                                <span class="menu-title">Dashboard</span>
+                                <span class="menu-title" style="color: #5a5a5a">Dashboard</span>
                             </a>
                         </li>
 
