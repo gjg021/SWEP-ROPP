@@ -9,8 +9,10 @@ use App\Models\Settings;
 use App\Models\User\LabAnalysis;
 use App\Models\User\OrderOfPayments;
 use App\Models\User\SupportingDocuments;
+use App\Models\User\SucroseContentModel;
 use App\Models\User\TransactionType;
 use App\Swep\Repositories\User\LabAnalysisRepository;
+use App\Swep\Repositories\User\SucroseContentRepository;
 use Carbon\Carbon;
 use File;
 use Illuminate\Http\Request;
@@ -54,8 +56,9 @@ class PaymentController extends Controller
                 ];
             }
         }
+        $sucrose_content_db = SucroseContentModel::get()->first();
         //return $transaction_types;
-        return view('dashboard.payment.create')->with(['transaction_types' => $transaction_types, 'lab_analysis' => $lab_analysis]);
+        return view('dashboard.payment.create')->with(['sucrose_contents' => $sucrose_content_db,'transaction_types' => $transaction_types, 'lab_analysis' => $lab_analysis]);
     }
 
     public function validateForm(){
@@ -76,15 +79,15 @@ class PaymentController extends Controller
                 $type = $transaction_type_db->type;
                 $request->transaction_type = $transaction_type_db->transaction_type;
                 switch ($type){                                                                                         //CHECK TRANSACTION TYPE USING DB
-                    case 'user':                                                                                        //IF TRANSACTION AMOUNT MUST BE USER GENERATED
-                        if(!$request->has('amount') || $request->amount == null ){
+                    case 'volume':                                                                                        //IF TRANSACTION AMOUNT MUST BE USER GENERATED
+                        if($transaction_type_db->transaction_code != "PRE" && (!$request->has('amount') || $request->amount == null )){
                             $status_code = 422;
                             $errors['amount'] = 'Please enter a valid amount';
                         }else{
                             return $this->review($request);
                         }
                         break;
-                    case 'static':                                                                                      //IF TRANSACTION AMOUNT IS FIXED OR PRESET
+                    case 'static' || 'mt':                                                                                      //IF TRANSACTION AMOUNT IS FIXED OR PRESET
                         return $this->review($request);
                         break;
                     default:                                                                                            //ELSE
@@ -205,7 +208,7 @@ class PaymentController extends Controller
             return [
                 'error' => "Invalid Transaction1",
             ];
-        }else{
+        }else {
             $transaction_code = $request->transaction_code;
             $user_id = Auth::guard('web')->user()->slug;
             $payment_method = 'Landbank LinkBiz Portal';
@@ -217,30 +220,30 @@ class PaymentController extends Controller
                 $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$request->LabAnalysisName);
             }*/
 
-            $transaction_type_db = TransactionType::where('transaction_code',$transaction_code)->first();
+            $transaction_type_db = TransactionType::where('transaction_code', $transaction_code)->first();
 
-            if(empty($transaction_type_db)){
+            if (empty($transaction_type_db)) {
                 return [
                     'error' => "Invalid Transactionssss",
                 ];
             }
 
-            if(count($request->file('files')) > 0){
+            if (count($request->file('files')) > 0) {
 
                 $payment = New OrderOfPayments;
                 $payment->transaction_type = $transaction_type_db->transaction_type;
                 $payment->payment_method = $payment_method;
                 $payment->amount = $request->amount;
-                $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5).rand(1000,9999)))).'-'.date('my');
+                $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5) . rand(1000, 9999)))) . '-' . date('my');
                 $payment->user_created = Auth::guard('web')->user()->slug;
                 $payment->expires_on = Carbon::now()->addDays(3);
 
-                if($payment->save()){
+                if ($payment->save()) {
                     $id = $payment->id;
-                    foreach($request->file('files') as $file){
+                    foreach ($request->file('files') as $file) {
                         $client_original_filename = $file->getClientOriginalName();
-                        $path = $user_id.'/['.$id.']-'.$client_original_filename;
-                        if($file->storeAs($user_id,'['.$id.']-'.$client_original_filename)){
+                        $path = $user_id . '/[' . $id . ']-' . $client_original_filename;
+                        if ($file->storeAs($user_id, '[' . $id . ']-' . $client_original_filename)) {
                             $sd = New SupportingDocuments;
                             $sd->transaction_id = $payment->slug;
                             $sd->path = $path;
@@ -249,21 +252,28 @@ class PaymentController extends Controller
                             $sd->save();
                         }
                     }
+
                     return [
                         'status' => 1,
                         'transaction_id' => $payment->slug,
-                        'amount' => $payment->amount,
-                        'timestamp'=> date('M d, Y | h:i:A',strtotime($payment->created_at))
+                        'amount' => number_format($payment->amount,2),
+                        'timestamp' => date('M d, Y | h:i:A', strtotime($payment->created_at))
                     ];
+                    //return view('dashboard.landBank')->with(['response'=>$payment]);
                 }
-
-            }else{
+            } else {
                 return [
-                    'error'=> 'Please attach supporting documents.',
+                    'error' => 'Please attach supporting documents.',
                 ];
             }
         }
         exit();
+    }
+
+    public function landBank($id){
+        $order_of_payments = OrderOfPayments::where('slug',$id)->first();
+
+        return view('dashboard.landBank')->with(['response'=>$order_of_payments]);
     }
 
     public function view_file(){
@@ -308,27 +318,28 @@ class PaymentController extends Controller
     private function amountComputer($code,$volume,$amount,$labAnalysisSlug){
         $transaction_type_db = TransactionType::where('transaction_code',$code)->first();
         $lab_analysis_db = LabAnalysis::where('slug',$labAnalysisSlug)->first();
+        $sucrose_content_db = SucroseContentModel::get()->first();
         if(empty($transaction_type_db)){
             return 'invalid';
         }else{
             if($transaction_type_db->type == 'volume'){
                 if($transaction_type_db->transaction_code == 'PRE'){
-                    if($lab_analysis_db->sucrose<=65){
-                        $amount = $volume*11.90;
+                    if($lab_analysis_db->sucrose == 0){
+                        $amount = 300;
                     }
-                    else if ($lab_analysis_db->sucrose>65) {
-                        $amount = $volume*37.75;
+                    else if($lab_analysis_db->sucrose > 0 && $lab_analysis_db->sucrose <= $sucrose_content_db->base_percentage){
+                        $amount = $volume*$sucrose_content_db->below_price;
+                    }
+                    else if ($lab_analysis_db->sucrose > 0 && $lab_analysis_db->sucrose > $sucrose_content_db->base_percentage) {
+                        $amount = $volume*$sucrose_content_db->above_price;
                     }
                 }
                 else {
                     $amount = $volume*$transaction_type_db->amount;
                 }
             }
-            if($transaction_type_db->type == 'static'){
+            if($transaction_type_db->type == 'static' || $transaction_type_db->type == 'mt' || $transaction_type_db->type == 'quedan'){
                 $amount = $transaction_type_db->amount;
-            }
-            if($transaction_type_db->type == 'user'){
-                $amount = $this->standardInt($amount);
             }
         }
         return $amount;

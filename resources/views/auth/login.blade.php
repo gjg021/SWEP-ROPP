@@ -4,7 +4,7 @@
 
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Star Admin Premium Bootstrap Admin Dashboard Template</title>
+	<title>Sugar Regulatory Administration</title>
 
 	@include('layouts.css-plugins')
 </head>
@@ -18,7 +18,7 @@
                         <div style="text-align: center;">
                             <img src="{{asset('images/SRA_DA_logo.png')}}" width="100">
                         </div>
-                        <h4>Hello! Let's get started</h4>
+                        <h4>Welcome!</h4>
 						@if(Session::has('VERIFIED_EMAIL'))
 							<div class="alert alert-fill-success" role="alert">
 								<i class="fa fa-check"></i> Well done! You successfully verified your email address.

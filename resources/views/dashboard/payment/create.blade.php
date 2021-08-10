@@ -89,12 +89,16 @@
 
 @section('scripts')
     <script type="text/javascript">
+        var baseContent = '{{$sucrose_contents['base_percentage']}}';
+        var belowPrice = '{{$sucrose_contents['below_price']}}';
+        var abovePrice = '{{$sucrose_contents['above_price']}}';
+        var zeroContent = '{{$sucrose_contents['zero_content']}}';
+
         autonum_settings = {
             currencySymbol : ' ₱',
             decimalCharacter : '.',
             digitGroupSeparator : ',',
         };
-
 
         function delay(callback, ms) {
             var timer = 0;
@@ -118,7 +122,6 @@
                 error:function (res) {
                     console.log(res);
                 }
-
             })
         }, 500));
         new AutoNumeric("#amount",autonum_settings);
@@ -128,7 +131,11 @@
             var option = $("#transaction_type option[value='"+t.val()+"']");
             var type = option.attr('type');
             var amount = option.attr('amount');
-            var stringAmount = type!='user'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+            var stringAmount = '';
+            if(option.attr('transactionCode') != 'PRE'){
+                stringAmount = type!='user'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+            }
+
             $("#amountString").html(stringAmount);
             $(".dynamics input").each(function () {
                 $(this).val('');
@@ -151,7 +158,7 @@
                 stringLabAnalysis += "<option disabled='' selected>--Please select--</option>";
                 stringLabAnalysis += "@if(count($lab_analysis)> 0)";
                 stringLabAnalysis += "@foreach($lab_analysis as $key1 => $slug)";
-                stringLabAnalysis += "<option id='suc{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
+                stringLabAnalysis += "<option onclick='changeProduct({{$slug['sucrose']}});' id='suc{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
                 stringLabAnalysis += "@endforeach";
                 stringLabAnalysis += "@endif";
                 stringLabAnalysis += "</select>";
@@ -160,6 +167,23 @@
             $("#divLabAnalysis").html(stringLabAnalysis);
         })
 
+        function changeProduct(sucCont){
+            var stringAmount = '';
+            if(sucCont == 0){
+                stringAmount = "<div><p>Sucrose Content: " + sucCont + "% <br>Fee: " + zeroContent + " / Application </p></div>";
+                $("#volume_container").slideUp();
+            }
+            else if(sucCont > 0 && sucCont <= baseContent){
+                stringAmount = "<div><p>Sucrose Content: " + sucCont + "% <br>Fee: " + belowPrice + " / Lkg-bag </p></div>";
+                $("#volume_container").slideDown();
+            }
+            else if (sucCont > 0 && sucCont > baseContent) {
+                stringAmount = "<div><p>Sucrose Content: " + sucCont + "% <br>Fee: " + abovePrice + " / Lkg-bag </p></div>";
+                $("#volume_container").slideDown();
+            }
+            $("#amountString").html(stringAmount);
+        }
+
         $("#volume_container input[name='volume']").keyup(function () {
             var t = $("#transaction_type");
             var option = $("#transaction_type option[value='"+t.val()+"']");
@@ -167,12 +191,12 @@
                 var r = $("#LabAnalysis");
                 var option1 = $("#LabAnalysis option[id='suc"+r.val()+"']");
                 var sucCont = option1.attr('sucrose');
-                if(sucCont<=65){
-                    $("#volume_amount").val($(this).val()*11.90);
+                if(sucCont > 0 && sucCont<=baseContent){
+                    $("#volume_amount").val($(this).val()*belowPrice);
                     new AutoNumeric("#volume_amount",autonum_settings);
                 }
-                else if (sucCont>65) {
-                    $("#volume_amount").val($(this).val()*37.75);
+                else if (sucCont > 0 && sucCont>baseContent) {
+                    $("#volume_amount").val($(this).val()*abovePrice);
                     new AutoNumeric("#volume_amount",autonum_settings);
                 }
             }

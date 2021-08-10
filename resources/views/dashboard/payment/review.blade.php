@@ -210,15 +210,18 @@
             console.log('File Upload Error', 'ID: ' + data.fileId + ', Thumb ID: ' + data.previewId);
         }).on('filebatchuploadsuccess', function(event, data) {
             console.log(data.response);
+            var id = data.response.transaction_id;
             $("#transaction_id").html(data.response.transaction_id);
-            $("#amountToPay").html("Amount to Pay: Php "+data.response.amount);
+            $("#amountToPay").html("Amount to Pay: Php "+ data.response.amount);
             $("#timestamp").html(data.response.timestamp);
             $('#pay_modal').modal('show');
-
             setTimeout(function(){
                 $("#done").slideDown();
                 $("#content").slideUp();
             },500);
+            //data.response is the object containing the values
+            window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+
         }).on('fileerror',function(event,data,msg){
             icon = $("#confirm_payment_btn i");
             icon.removeClass('fa-spinner');

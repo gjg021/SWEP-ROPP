@@ -41,13 +41,7 @@ class AdminService extends BaseService{
 
     }
 
-
-
-
-
-
     public function store($request){
-
 
         $new_slug = $this->new_slug();
         while ($new_slug == 0) {

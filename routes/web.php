@@ -51,6 +51,9 @@ Route::group(['as' => 'auth.'], function () {
         Route::post('payments/validate_form', 'PaymentController@validateForm')->name('payments.validate_form');
         Route::get('payments/view_file', 'PaymentController@view_file')->name('payments.view_file');
 		Route::post('payments/review', 'PaymentController@review')->name('payments.review');
+
+        Route::get('landBank/{id}', 'PaymentController@landBank')->name('landBank');
+
         Route::resource('payments','PaymentController');
 
         Route::resource('std/premix','PremixController',[
@@ -78,8 +81,6 @@ Route::group(['as' => 'auth.'], function () {
 
 
 	Route::group(['prefix'=>'admin', 'as' => 'admin.', 'middleware' => ['check.admin_route']], function () {
-
-		
 
 		Route::get('/home', 'Admin\HomeController@index')->name('home');
 
@@ -150,5 +151,9 @@ Route::get('/testing_page', function(){
 
 Route::get('/receive', function(){
 	return view('test.receive');
+});
+
+/*Route::get('/landBank', function(){
+    return view('dashboard.landBank');
 });
 
