@@ -29,8 +29,36 @@
                         <div class="row justify-content">
                             <div class="col-md-12">
                                 <h4> Summary</h4>
-
-                                <table class="table mt-5 mb-5">
+                                @if($response->transaction_type == "Premix")
+                                    <form id="premixProductForm">
+                                        @csrf
+                                        <div class="form-group">
+                                            <table class="table">
+                                                <tbody id="">
+                                                @if(count($premixProduct)> 0)
+                                                    @foreach($premixProduct as $key1 => $tdID)
+                                                        <tr id="">
+                                                            <td>
+                                                                <input type="text" name="tdID[]" id="tdID[]" class="form-control" value="{{$tdID['tdID']}}">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="tdNames[]" id="tdNames[]" class="form-control" value="{{$tdID['tdProduct']}}">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="tdVolume[]" id="tdVolume[]" class="form-control" value="{{$tdID['tdVolume']}}">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="tdAmount[]" id="tdAmount[]" class="form-control" value="{{$tdID['tdAmount']}}">
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </form>
+                                @endif
+                                <table class="table mb-5">
                                     <tbody>
                                     <tr>
                                         <td width="25%">Transaction Type</td>
@@ -49,6 +77,13 @@
                                             <td width="25%">Volume</td>
                                             <td width="5%">:</td>
                                             <td>{{$response->volume}} Lkg/tc</td>
+                                        </tr>
+                                    @endif
+                                    @if(!empty($response->totalVolume))
+                                        <tr>
+                                            <td width="25%">Volume</td>
+                                            <td width="5%">:</td>
+                                            <td>{{$response->totalVolume}} Lkg/tc</td>
                                         </tr>
                                     @endif
                                     <tr>
@@ -88,14 +123,11 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Instructions:</h4>
-
                         @include('dashboard.includes.instructions')
-
                     <hr>
                     @php
                         $drs = App\Models\User\DocumentaryRequirement::where('transaction_type',$response->transaction_code)->orderBy('sort','asc')->get();
                     @endphp
-
                     @if($drs->count() > 0)
                         <h4 class="card-title text-danger">Documentary Requirements for <b>{{strtoupper($response->transaction_type)}}</b>:</h4>
                         <ol >
@@ -137,6 +169,12 @@
                                     <td>{{$response->volume}} Lkg/tc</td>
                                 </tr>
                             @endif
+                            @if(!empty($response->totalVolume))
+                                <tr>
+                                    <td>Volume:</td>
+                                    <td>{{$response->totalVolume}} Lkg/tc</td>
+                                </tr>
+                            @endif
                             <tr>
                                 <td>Payment method:</td>
                                 <td>{{$response->payment_method}}</td>
@@ -156,7 +194,6 @@
         </div>
     </div>
 
-
 <script type="text/javascript">
     $(document).ready(function(){
         uploader = $("#input-100").fileinput({
@@ -173,6 +210,9 @@
                 'payment_method' : "{{$response->payment_method}}",
                 @if(!empty($response->volume))
                 'volume' : "{{$response->volume}}",
+                @endif
+                        @if(!empty($response->totalVolume))
+                'totalVolume' : "{{$response->totalVolume}}",
                 @endif
                 'amount' : "{{$response->amount}}",
             },
@@ -211,6 +251,19 @@
         }).on('filebatchuploadsuccess', function(event, data) {
             console.log(data.response);
             var id = data.response.transaction_id;
+            form = $("#premixProductForm");
+            formData = form.serialize();
+            $.ajax({
+                url : "http://localhost:8001/dashboard/OOP/"+id,
+                data: formData,
+                type: 'POST',
+                success: function (res) {
+                    window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+                },
+                error: function (res) {
+                    alert("error");
+                }
+            });
             $("#transaction_id").html(data.response.transaction_id);
             $("#amountToPay").html("Amount to Pay: Php "+ data.response.amount);
             $("#timestamp").html(data.response.timestamp);
@@ -219,9 +272,8 @@
                 $("#done").slideDown();
                 $("#content").slideUp();
             },500);
+            //window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
             //data.response is the object containing the values
-            window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
-
         }).on('fileerror',function(event,data,msg){
             icon = $("#confirm_payment_btn i");
             icon.removeClass('fa-spinner');

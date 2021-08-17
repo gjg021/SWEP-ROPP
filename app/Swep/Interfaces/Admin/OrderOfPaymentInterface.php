@@ -14,6 +14,4 @@ interface OrderOfPaymentInterface {
 
     public function destroy($slug);
 
-
-
 }

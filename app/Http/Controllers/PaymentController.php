@@ -8,6 +8,7 @@ use App\Http\Requests\User\PaymentFormRequest;
 use App\Models\Settings;
 use App\Models\User\LabAnalysis;
 use App\Models\User\OrderOfPayments;
+use App\Models\User\OrderOfPaymentsDetailsModel;
 use App\Models\User\SupportingDocuments;
 use App\Models\User\SucroseContentModel;
 use App\Models\User\TransactionType;
@@ -19,7 +20,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Storage;
 use Auth;
+use SebastianBergmann\Environment\Console;
 use Yajra\DataTables\Facades\DataTables;
+use function Matrix\add;
 
 class PaymentController extends Controller
 {
@@ -117,7 +120,12 @@ class PaymentController extends Controller
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
         $payment_method = 'Landbank LinkBiz Portal';
-        $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$labAnalysisSlug);
+        if($request->transaction_type == "Premix"){
+            $amount = $request->totalAmount;
+        }
+        else {
+            $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$labAnalysisSlug);
+        }
 
         $response = collect();
         if(!empty($labAnalysisRepo)){
@@ -127,21 +135,34 @@ class PaymentController extends Controller
         $response->amount = $amount;
         $response->payment_method = $payment_method;
         $response->transaction_code = $request->transaction_code;
-        if(!empty($request->volume)){
-            $response->volume = $request->volume;
+        if($request->transaction_type == "Premix"){
+            $response->totalVolume = $request->totalVolume;
+        }
+        else {
+            if(!empty($request->volume)){
+                $response->volume = $request->volume;
+            }
         }
 
-        return view('dashboard.payment.review')->with(['response'=>$response]);
+        $premixProduct = [];
+        if($request->transaction_type == "Premix"){
+            foreach($request->tdID as $key=>$tdID){
+                $premixProduct[$tdID] = [
+                    'tdID' => $tdID,
+                    'tdProduct' => $request->tdNames[$key],
+                    'tdVolume' => $request->tdVolume[$key],
+                    'tdAmount' => str_replace("₱", "", $request->tdAmount[$key]),
+                ];
+            }
+        }
+        return view('dashboard.payment.review')->with(['response'=>$response, 'premixProduct'=>$premixProduct]);
     }
 
     public function show($id){
-
         if(Auth::guard('web')->check()){
             $op = OrderOfPayments::where('slug',$id)->first();
-
             return view('dashboard.payment.show')->with(['op' => $op]);
         }
-
     }
 
     public function index(){
@@ -158,8 +179,6 @@ class PaymentController extends Controller
 
             if(!empty(request()->transaction_type)){
                 if(request()->transaction_type != 'All'){
-
-
                     $order_of_payments = $order_of_payments->where('transaction_type',request()->transaction_type);
                 }
             }
@@ -224,19 +243,29 @@ class PaymentController extends Controller
 
             if (empty($transaction_type_db)) {
                 return [
-                    'error' => "Invalid Transactionssss",
+                    'error' => "Invalid Transactions",
                 ];
             }
 
             if (count($request->file('files')) > 0) {
 
                 $payment = New OrderOfPayments;
+                $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5) . rand(1000, 9999)))) . '-' . date('my');
                 $payment->transaction_type = $transaction_type_db->transaction_type;
                 $payment->payment_method = $payment_method;
-                $payment->amount = $request->amount;
-                $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5) . rand(1000, 9999)))) . '-' . date('my');
-                $payment->user_created = Auth::guard('web')->user()->slug;
+                $volume = 0;
+                if($payment->transaction_type == "Premix"){
+                    $volume = $request->totalVolume;
+                }
+                else {
+                    $volume = $request->volume;
+                }
+                $payment->total_volume = $volume;
+                $payment->total_amount = $request->amount;
+                $payment->status = "To Pay";
                 $payment->expires_on = Carbon::now()->addDays(3);
+                $payment->user_created = Auth::guard('web')->user()->slug;
+                $payment->user_updated = Auth::guard('web')->user()->slug;
 
                 if ($payment->save()) {
                     $id = $payment->id;
@@ -256,7 +285,7 @@ class PaymentController extends Controller
                     return [
                         'status' => 1,
                         'transaction_id' => $payment->slug,
-                        'amount' => number_format($payment->amount,2),
+                        'amount' => number_format($payment->total_amount,2),
                         'timestamp' => date('M d, Y | h:i:A', strtotime($payment->created_at))
                     ];
                     //return view('dashboard.landBank')->with(['response'=>$payment]);
@@ -266,6 +295,21 @@ class PaymentController extends Controller
                     'error' => 'Please attach supporting documents.',
                 ];
             }
+        }
+        exit();
+    }
+
+    public function orderOfPaymentsDetails(Request $request, $id){
+        foreach($request->tdID as $key=>$tdID){
+        $oOP = new OrderOfPaymentsDetailsModel();
+        $oOP->order_of_payments_slug = $id;
+        $oOP->product = $request->tdNames[$key];
+        $oOP->volume =  $request->tdVolume[$key];
+        $oOP->amount =  $request->tdAmount[$key];
+        $oOP->created_at = Carbon::now();
+        $oOP->user_created = Auth::guard('web')->user()->slug;
+        $oOP->updated_at = Carbon::now();
+        $oOP->save();
         }
         exit();
     }

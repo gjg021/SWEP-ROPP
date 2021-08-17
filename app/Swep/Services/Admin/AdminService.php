@@ -12,8 +12,6 @@ use Validator;
 
 class AdminService extends BaseService{
 
-
-
     protected $admin_repo;
     protected $admin_functions_repo;
 
@@ -28,12 +26,9 @@ class AdminService extends BaseService{
 
     }
 
-
     public function fetchTable($data){
         return $this->admin_repo->fetchTable($data);
     }
-
-
 
     public function fetch($slug){
         
@@ -47,7 +42,6 @@ class AdminService extends BaseService{
         while ($new_slug == 0) {
             $new_slug = $this->new_slug();
         }
-
 
         $request->request->add(['slug' => $new_slug]);
         $admin = $this->admin_repo->store($request);
@@ -70,24 +64,11 @@ class AdminService extends BaseService{
 
     public function show($slug){
 
-    
-
     }
-
-
-
-
-
 
     public function edit($slug){
 
-      
-
     }
-
-
-
-
 
     public function update($request, $slug){
 
@@ -114,10 +95,6 @@ class AdminService extends BaseService{
 
     }
 
-
-
-
-
     public function destroy($slug){
 
       $admin = $this->admin_repo->destroy($slug);
@@ -130,7 +107,6 @@ class AdminService extends BaseService{
 
       return -1;
     }
-
 
     public function new_slug(){
 
@@ -148,11 +124,5 @@ class AdminService extends BaseService{
 
         return $slug;
     }
-
-
-
-
-
-
 
 }

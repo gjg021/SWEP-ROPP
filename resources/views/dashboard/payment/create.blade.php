@@ -17,8 +17,8 @@
                     <div class="row justify-content">
                         <div class="col-md-12">
                             <div class="card-title">
+                                <button id="addProduct" style="display: none" class="btn btn-primary mt-lg-1 center" onclick="addProduct()"><i class="fa fa-caret-right" ></i> Add</button>
                                 <form id="order_of_payment_form">
-                                    <br>
                                     @csrf
                                     <div class="form-group">
                                         <label>Transaction type:</label>
@@ -35,6 +35,7 @@
                                             @endif
                                         </select>
                                     </div>
+
                                     <div id="divLabAnalysis">
                                     </div>
                                     <div id="amountString">
@@ -44,24 +45,44 @@
 {{--                                        <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume"> x multiplier--}}
 {{--                                    </div>--}}
 
-                                        <div id="amount_container" style="display: none" class="dynamics">
-                                            <div class="form-group">
-                                                <label>Amount: </label>
-                                                <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
-                                            </div>
+                                    <div id="amount_container" style="display: none" class="dynamics">
+                                        <div class="form-group">
+                                            <label>Amount: </label>
+                                            <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
                                         </div>
-
-                                        <div id="volume_container" style="display: none" class="dynamics">
-                                            <div class="form-group">
-                                                <label>Volume (Lkg/tc)</label>
-                                                <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Amount: </label>
-                                                <input type="text" name="volume_amount" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
-                                            </div>
+                                    </div>
+                                    <div id="volume_container" style="display: none" class="dynamics">
+                                        <div class="form-group col-md-6">
+                                            <label>Volume (Lkg/tc)</label>
+                                            <input type="text" class="form-control form-control-lg" placeholder="Lkg/tc" id="volume" name="volume">
                                         </div>
-                                        <button type="submit" class="btn btn-primary center"><i class="fa fa-caret-right"></i> Proceed</button>
+                                        <div class="form-group col-md-6">
+                                            <label>Amount: </label>
+                                            <input type="text" name="volume_amount" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
+                                        </div>
+                                        <div class="form-group" style="display: none">
+                                            <label>Total Volume</label>
+                                            <input id="totalVolume" name="totalVolume" type="text" class="form-control form-control-lg" placeholder="Lkg/tc">
+                                        </div>
+                                        <div class="form-group" style="display: none">
+                                            <label>Total Amount</label>
+                                            <input type="text" name="totalAmount" id="totalAmount" class="form-control form-control-lg" value="0" readonly>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary center"><i class="fa fa-caret-right"></i> Proceed</button>
+                                    <div id="divProduct" style="display: none" class="dynamics">
+                                        <table id="tbProduct" class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Volume</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -73,9 +94,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Instructions:</h4>
-
                         @include('dashboard.includes.instructions')
-
                 </div>
             </div>
         </div>
@@ -89,6 +108,21 @@
 
 @section('scripts')
     <script type="text/javascript">
+        function addProduct(){
+            var r = $("#LabAnalysis");
+            var option1 = $("#LabAnalysis option[id='"+r.val()+"']");
+            var names = option1.attr('name');
+            $("#totalVolume").val(Number($("#totalVolume").val())+Number($("#volume").val()));
+            $("#totalAmount").val(Number($("#totalAmount").val())+Number($("#volume_amount").val().replace("₱","")));
+            var tr = '<tr id='+option1.attr('id')+'>' +
+                '<td width="10%"><input type="text" name="tdID[]" id="tdID[]" class="form-control" value="'+option1.attr('id')+'"></td>'+
+                '<td width="60%"><input type="text" name="tdNames[]" id="tdNames[]" class="form-control" value="'+names+'"></td>'+
+                '<td width="15%"><input type="text" name="tdVolume[]" id="tdVolume[]" class="form-control" value='+$("#volume").val()+'></td>'+
+                '<td width="15%"><input type="text" name="tdAmount[]" id="tdAmount[]" class="form-control" value='+$("#volume_amount").val()+'></td>'+
+                '</tr>';
+            $('tbody').append(tr);
+        }
+
         var baseContent = '{{$sucrose_contents['base_percentage']}}';
         var belowPrice = '{{$sucrose_contents['below_price']}}';
         var abovePrice = '{{$sucrose_contents['above_price']}}';
@@ -158,11 +192,17 @@
                 stringLabAnalysis += "<option disabled='' selected>--Please select--</option>";
                 stringLabAnalysis += "@if(count($lab_analysis)> 0)";
                 stringLabAnalysis += "@foreach($lab_analysis as $key1 => $slug)";
-                stringLabAnalysis += "<option onclick='changeProduct({{$slug['sucrose']}});' id='suc{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
+                stringLabAnalysis += "<option onclick='changeProduct({{$slug['sucrose']}});' id='{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
                 stringLabAnalysis += "@endforeach";
                 stringLabAnalysis += "@endif";
                 stringLabAnalysis += "</select>";
                 stringLabAnalysis += "</div>";
+
+                $("#divProduct").slideDown();
+                $("#addProduct").slideDown();
+            }
+            else {
+                $("#addProduct").slideUp();
             }
             $("#divLabAnalysis").html(stringLabAnalysis);
         })
@@ -189,7 +229,7 @@
             var option = $("#transaction_type option[value='"+t.val()+"']");
             if(option.attr('transactionCode') == 'PRE'){
                 var r = $("#LabAnalysis");
-                var option1 = $("#LabAnalysis option[id='suc"+r.val()+"']");
+                var option1 = $("#LabAnalysis option[id='"+r.val()+"']");
                 var sucCont = option1.attr('sucrose');
                 if(sucCont > 0 && sucCont<=baseContent){
                     $("#volume_amount").val($(this).val()*belowPrice);
@@ -212,8 +252,6 @@
             form = $(this);
             formData = form.serialize();
             loading_btn(form);
-
-
             $.ajax({
                 url : "{{route('dashboard.payments.validate_form')}}",
                 data: formData,

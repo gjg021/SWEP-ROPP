@@ -16,14 +16,10 @@ class PaymentFormRequest extends FormRequest
     public function rules(){
 
         $rules = [
-
             'transaction_code'=>'required|string|max:45',
             'payment_method'=>'required|string|max:45',
             'amount'=>'required|between:0.01,1000000.00',
         ];
-
-
-
         return $rules;
 
     }

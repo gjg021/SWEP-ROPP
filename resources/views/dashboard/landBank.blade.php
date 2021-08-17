@@ -10,23 +10,18 @@
     body {
         background: #f5f5f5
     }
-
     .rounded {
         border-radius: 1rem
     }
-
     .nav-pills .nav-link {
         color: #555
     }
-
     .nav-pills .nav-link.active {
         color: white
     }
-
     input[type="radio"] {
         margin-right: 5px
     }
-
     .bold {
         font-weight: bold
     }
@@ -60,7 +55,7 @@
                         <tr>
                             <td width="20%">Amount to pay</td>
                             <td width="5%">:</td>
-                            <td width="75%" style="font-size: larger; font-weight: 600" class="font-weight-bold"> {{number_format($response->amount,2)}}</td>
+                            <td width="75%" style="font-size: larger; font-weight: 600" class="font-weight-bold"> {{number_format($response->total_amount,2)}}</td>
                         </tr>
 
                         </tbody>

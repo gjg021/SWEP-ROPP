@@ -52,6 +52,7 @@ Route::group(['as' => 'auth.'], function () {
         Route::get('payments/view_file', 'PaymentController@view_file')->name('payments.view_file');
 		Route::post('payments/review', 'PaymentController@review')->name('payments.review');
 
+        Route::post('OOP/{id}', 'PaymentController@orderOfPaymentsDetails')->name('OOP');
         Route::get('landBank/{id}', 'PaymentController@landBank')->name('landBank');
 
         Route::resource('payments','PaymentController');
