@@ -419,7 +419,7 @@
 		        	}
 		        },
 		        cancel: function () {
-		            notify_custom('Not a single resouce was added','warning');
+		            notify_custom('Not a single resource was added','warning');
 		        }
 		        
 		    }

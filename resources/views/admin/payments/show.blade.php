@@ -1,46 +1,36 @@
 <div class="modal-header">
-    <h5 class="modal-title"><code>{{$op->slug}}</code></h5>
-    <button type="button" class="close">
-        <span aria-hidden="true">×</span>
-    </button>
+    <h3 class="modal-title"><code>{{$op->slug}}</code></h3>
 </div>
 <div class="modal-body">
-
         <div class="row">
-            <div class="col-md-4 d-flex">
-                <div class="d-inline-flex align-items-center justify-content-center border rounded-circle px-2 py-2 my-auto text-muted">
-                    <i class="fa fa-list-ul icon-sm my-1 mx-1"></i>
+            <div class="col-md-12">
+                <div class="">
+                    <p class="mb-0 font-weight-medium text-muted"> Client</p>
+                    <h4 class="font-weight-semibold mb-0 text-info">{{$user->business_name}}</h4>
                 </div>
-                <div class="wrapper pl-3">
+            </div>
+            <div class="col-md-12">
+                <div class="">
                     <p class="mb-0 font-weight-medium text-muted"> Transaction Type</p>
-                    <h6 class="font-weight-semibold mb-0 text-info">{{$op->transaction_type}}</h6>
+                    <h4 class="font-weight-semibold mb-0 text-info">{{$op->transaction_type}}</h4>
                 </div>
             </div>
-            <div class="col d-flex">
-                <div class="d-inline-flex align-items-center justify-content-center border rounded-circle px-2 py-2 my-auto text-muted">
-                    <i class="fa fa-credit-card icon-sm my-1 mx-1"></i>
-                </div>
-                <div class="wrapper pl-3">
+            <div class="col-md-12">
+                <div class="">
                     <p class="mb-0 font-weight-medium text-muted">Payment Method</p>
-                    <h6 class="font-weight-semibold mb-0 text-info">{{$op->payment_method}}</h6>
+                    <h4 class="font-weight-semibold mb-0 text-info">{{$op->payment_method}}</h4>
                 </div>
             </div>
-            <div class="col d-flex">
-                <div class="d-inline-flex align-items-center justify-content-center border rounded-circle px-2 py-2 my-auto text-muted">
-                    <i class="fa fa-ruble icon-sm my-1 mx-2"></i>
-                </div>
-                <div class="wrapper pl-3">
+            <div class="col-md-12">
+                <div class="">
                     <p class="mb-0 font-weight-medium text-muted">Amount</p>
-                    <h6 class="font-weight-semibold mb-0 text-info">{{number_format($op->total_amount,2)}}</h6>
+                    <h4 class="font-weight-semibold mb-0 text-info">{{number_format($op->total_amount,2)}}</h4>
                 </div>
             </div>
-            <div class="col d-flex">
-                <div class="d-inline-flex align-items-center justify-content-center border rounded-circle px-2 py-2 my-auto text-muted">
-                    <i class="fa fa-clock-o icon-sm my-1 mx-1"></i>
-                </div>
-                <div class="wrapper pl-3">
+            <div class="col-md-12">
+                <div class="">
                     <p class="mb-0 font-weight-medium text-muted">Status</p>
-                    <h6 class="font-weight-semibold mb-0 text-primary">To Pay</h6>
+                    <h4 class="font-weight-semibold mb-0 text-primary">{{$op->status}}</h4>
                 </div>
             </div>
         </div>
@@ -59,8 +49,6 @@
                                     <div class="text-center" >
                                         <i class="fa fa-file-pdf-o icon-sm text-muted" style="font-size: 1.8rem"></i>
                                     </div>
-
-
                                     <div class="badge badge-outline-danger badge-pill">PDF</div>
                                 </div>
                                 <div class="media-body">
@@ -78,7 +66,6 @@
                                         </h6>
                                     </div>
                                     <div>
-
                                             @if(Storage::disk('local')->exists($supporting_document->path))
                                                 <small class="text-muted">
                                                     {{round(Storage::disk('local')->size($supporting_document->path)/1000000,2)}} mb
@@ -90,8 +77,6 @@
                                                     <i class="fa fa-warning"></i> File not Found
                                                 </small>
                                             @endif
-
-
                                     </div>
                                 </div>
                             </div>
@@ -101,8 +86,8 @@
             @endforeach
         @endif
     </div>
-
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary">Save changes</button>
 </div>

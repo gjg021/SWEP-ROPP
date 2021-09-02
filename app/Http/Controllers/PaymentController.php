@@ -6,14 +6,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\PaymentFormRequest;
 use App\Models\Settings;
+use App\Models\User;
 use App\Models\User\LabAnalysis;
 use App\Models\User\OrderOfPayments;
 use App\Models\User\OrderOfPaymentsDetailsModel;
 use App\Models\User\SupportingDocuments;
 use App\Models\User\SucroseContentModel;
 use App\Models\User\TransactionType;
+use App\Swep\Interfaces\User\UserInterface;
 use App\Swep\Repositories\User\LabAnalysisRepository;
 use App\Swep\Repositories\User\SucroseContentRepository;
+use App\Swep\Repositories\User\UserRepository;
 use Carbon\Carbon;
 use File;
 use Illuminate\Http\Request;
@@ -27,10 +30,68 @@ use function Matrix\add;
 class PaymentController extends Controller
 {
     protected $labAnalysisRepo;
+    protected $user_repo;
     public function __construct(LabAnalysisRepository $labAnalysisRepo)
     {
         $this->labAnalysisRepo = $labAnalysisRepo;
         parent::__construct();
+    }
+
+    public function index(){
+        if(request()->ajax()){
+            $order_of_payments = OrderOfPayments::where('user_created',Auth::guard('web')->user()->slug);
+            if(!empty(request()->status)){
+                if(request()->status == 'Active'){
+                    $order_of_payments = $order_of_payments->where('expires_on' ,'>', Carbon::now());
+                }
+                if(request()->status == 'Expired'){
+                    $order_of_payments = $order_of_payments->where('expires_on' ,'<=', Carbon::now());
+                }
+            }
+
+            if(!empty(request()->transaction_type)){
+                if(request()->transaction_type != 'All'){
+                    $order_of_payments = $order_of_payments->where('transaction_type',request()->transaction_type);
+                }
+            }
+
+            return DataTables::of($order_of_payments)
+
+                ->editColumn('slug',function($data){
+                    return '<h4><code>'.$data->slug.'</code></h4><hr style="margin-bottom: 2px;margin-top: 2px;">
+                            <small class="text-muted">Date: '.date("M. d, Y|h:i A",strtotime($data->created_at)).'</small>
+                            <br>
+                            <small class="text-muted">Expires on: '.date("M. d, Y|h:i A",strtotime($data->expires_on)).'</small>';
+                })
+                ->editColumn('total_amount', '{{number_format($total_amount,2)}}')
+                ->addColumn('status', function($data){
+                    if($data->expires_on <= Carbon::now()){
+                        return '<div class="badge badge-danger">Expired</div>';
+                    }else{
+                        return '<div class="badge badge-primary">To Pay</div>';
+                    }
+                })
+                ->addColumn('action',function($data){
+//                    return '<div class="btn-group" role="group" aria-label="Basic example" style="height: 45%">
+//                            <button type="button" class="btn btn-light btn-lg btn-outline" data="'.$data->slug.'"><i class="fa fa-eye"></i> View</button>
+//                            <button type="button" class="btn btn-light btn-lg">Other</button>
+//                          </div>';
+                    if($data->expires_on > Carbon::now()){
+                        return '<div class="btn-group" role="group" aria-label="Basic example" style="height: 45%">
+                                <button type="button" class="btn btn-success btn-lg btn-outline" data="'.$data->slug.'"><i class="fa fa-rub"></i> Pay Now</button>
+                                <button type="button" class="btn btn-secondary btn-lg btn-outline view_btn" data="'.$data->slug.'" data-toggle="modal" data-target="#view_modal">View</button>
+                            </div>';
+                    }
+                })
+                ->setRowClass(function($data){
+                    if($data->expires_on <= Carbon::now()){
+                        return 'table-muted';
+                    }
+                })
+                ->escapeColumns([])
+                ->make(true);
+        }
+        return view('dashboard.payment.index');
     }
 
     public function create(){
@@ -120,7 +181,7 @@ class PaymentController extends Controller
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
         $payment_method = 'Landbank LinkBiz Portal';
-        if($request->transaction_type == "Premix"){
+        if($request->transaction_code == "PRE"){
             $amount = $request->totalAmount;
         }
         else {
@@ -135,7 +196,7 @@ class PaymentController extends Controller
         $response->amount = $amount;
         $response->payment_method = $payment_method;
         $response->transaction_code = $request->transaction_code;
-        if($request->transaction_type == "Premix"){
+        if($request->transaction_code == "PRE"){
             $response->totalVolume = $request->totalVolume;
         }
         else {
@@ -145,7 +206,7 @@ class PaymentController extends Controller
         }
 
         $premixProduct = [];
-        if($request->transaction_type == "Premix"){
+        if($request->transaction_code == "PRE"){
             foreach($request->tdID as $key=>$tdID){
                 $premixProduct[$tdID] = [
                     'tdID' => $tdID,
@@ -163,63 +224,6 @@ class PaymentController extends Controller
             $op = OrderOfPayments::where('slug',$id)->first();
             return view('dashboard.payment.show')->with(['op' => $op]);
         }
-    }
-
-    public function index(){
-        if(request()->ajax()){
-            $order_of_payments = OrderOfPayments::where('user_created',Auth::guard('web')->user()->slug);
-            if(!empty(request()->status)){
-                if(request()->status == 'Active'){
-                    $order_of_payments = $order_of_payments->where('expires_on' ,'>', Carbon::now());
-                }
-                if(request()->status == 'Expired'){
-                    $order_of_payments = $order_of_payments->where('expires_on' ,'<=', Carbon::now());
-                }
-            }
-
-            if(!empty(request()->transaction_type)){
-                if(request()->transaction_type != 'All'){
-                    $order_of_payments = $order_of_payments->where('transaction_type',request()->transaction_type);
-                }
-            }
-
-            return DataTables::of($order_of_payments)
-                
-                ->editColumn('slug',function($data){
-                    return '<h4><code>'.$data->slug.'</code></h4><hr style="margin-bottom: 2px;margin-top: 2px;">
-                            <small class="text-muted">Date: '.date("M. d, Y|h:i A",strtotime($data->created_at)).'</small>
-                            <br>
-                            <small class="text-muted">Expires on: '.date("M. d, Y|h:i A",strtotime($data->expires_on)).'</small>';
-                })
-                ->editColumn('amount', '{{number_format($amount,2)}}')
-                ->addColumn('status', function($data){
-                    if($data->expires_on <= Carbon::now()){
-                        return '<div class="badge badge-danger">Expired</div>';
-                    }else{
-                        return '<div class="badge badge-primary">To Pay</div>';
-                    }
-                })
-                ->addColumn('action',function($data){
-//                    return '<div class="btn-group" role="group" aria-label="Basic example" style="height: 45%">
-//                            <button type="button" class="btn btn-light btn-lg btn-outline" data="'.$data->slug.'"><i class="fa fa-eye"></i> View</button>
-//                            <button type="button" class="btn btn-light btn-lg">Other</button>
-//                          </div>';
-                    if($data->expires_on > Carbon::now()){
-                        return '<div class="btn-group" role="group" aria-label="Basic example" style="height: 45%">
-                                <button type="button" class="btn btn-success btn-lg btn-outline" data="'.$data->slug.'"><i class="fa fa-rub"></i> Pay Now</button>
-                                <button type="button" class="btn btn-secondary btn-lg btn-outline view_btn" data="'.$data->slug.'" data-toggle="modal" data-target="#view_modal">View</button>
-                            </div>';
-                    }
-                })
-                ->setRowClass(function($data){
-                    if($data->expires_on <= Carbon::now()){
-                        return 'table-muted';
-                    }
-                })
-                ->escapeColumns([])
-                ->make(true);
-        }
-        return view('dashboard.payment.index');
     }
 
     public function store(PaymentFormRequest $request){
@@ -254,7 +258,7 @@ class PaymentController extends Controller
                 $payment->transaction_type = $transaction_type_db->transaction_type;
                 $payment->payment_method = $payment_method;
                 $volume = 0;
-                if($payment->transaction_type == "Premix"){
+                if($request->transaction_code == "PRE"){
                     $volume = $request->totalVolume;
                 }
                 else {
@@ -262,7 +266,7 @@ class PaymentController extends Controller
                 }
                 $payment->total_volume = $volume;
                 $payment->total_amount = $request->amount;
-                $payment->status = "To Pay";
+                $payment->status = "TO PAY";
                 $payment->expires_on = Carbon::now()->addDays(3);
                 $payment->user_created = Auth::guard('web')->user()->slug;
                 $payment->user_updated = Auth::guard('web')->user()->slug;
@@ -285,6 +289,7 @@ class PaymentController extends Controller
                     return [
                         'status' => 1,
                         'transaction_id' => $payment->slug,
+                        'transaction_code' => $transaction_code,
                         'amount' => number_format($payment->total_amount,2),
                         'timestamp' => date('M d, Y | h:i:A', strtotime($payment->created_at))
                     ];
@@ -316,8 +321,14 @@ class PaymentController extends Controller
 
     public function landBank($id){
         $order_of_payments = OrderOfPayments::where('slug',$id)->first();
+        $user = User::where('slug',$order_of_payments->user_created)->first();
+        return view('dashboard.landBank')->with(['response'=>$order_of_payments, 'user'=>$user]);
+    }
 
-        return view('dashboard.landBank')->with(['response'=>$order_of_payments]);
+    public function getTransaction(Request $request){
+        $order_of_payments = OrderOfPayments::where('slug',$request->transactionID)->first();
+        $user = User::where('slug',$order_of_payments->user_created)->first();
+        return view('verification')->with(['response'=>$order_of_payments,'user'=>$user]);
     }
 
     public function view_file(){

@@ -1,8 +1,4 @@
-
-
-
-
-<script type="text/javascript" src="{{ asset('template/bower_components/jquery/dist/jquery.min.js') }}"></script>  
+<script type="text/javascript" src="{{ asset('template/bower_components/jquery/dist/jquery.min.js') }}"></script>
 
 <script type="text/javascript" src="{{ asset('template/bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 
@@ -32,7 +28,6 @@
 
 <script type="text/javascript" src="{{ asset('js/app.js') }}"></script>
 
-
 {{-- Charts --}}
 <script type="text/javascript" src="{{ asset('template/bower_components/Flot/jquery.flot.js') }}"></script>
 
@@ -46,7 +41,6 @@
 <script type="text/javascript" src="{{ asset('template/plugins/DataTables/datatables.min.js') }}"></script>
 
 <script type="text/javascript" src="{{ asset('template/plugins/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-
 
 <script type="text/javascript" src="{{asset('template/plugins/jquery-confirm/dist/jquery-confirm.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('template/plugins/typeahead/js/bootstrap-typeahead.min.js')}}"></script>

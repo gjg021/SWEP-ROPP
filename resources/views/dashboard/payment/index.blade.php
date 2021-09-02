@@ -112,7 +112,7 @@
             { "data": "slug" },
             { "data": "transaction_type" },
             { "data": "payment_method" },
-            { "data": "amount" },
+            { "data": "total_amount" },
             { "data": "status" },
             { "data": "action" },
         ],

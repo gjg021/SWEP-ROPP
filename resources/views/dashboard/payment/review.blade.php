@@ -23,32 +23,44 @@
                         <h4 id="amountToPay"></h4>
                         <h5 id="timestamp"></h5>
                         <img  width="600" src="{{asset('images/payment.gif')}}" style="margin-bottom: 30px">
-                        <h4>We are redirecting you to the {{$response->payment_method}}</h4>
+                        <h4>We redirected you to the {{$response->payment_method}}</h4>
                     </div>
                     <div id="content">
                         <div class="row justify-content">
                             <div class="col-md-12">
                                 <h4> Summary</h4>
-                                @if($response->transaction_type == "Premix")
+                                @if($response->transaction_code == "PRE")
                                     <form id="premixProductForm">
                                         @csrf
                                         <div class="form-group">
                                             <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Product ID</th>
+                                                    <th>Product</th>
+                                                    <th>Volume</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                                </thead>
                                                 <tbody id="">
                                                 @if(count($premixProduct)> 0)
                                                     @foreach($premixProduct as $key1 => $tdID)
                                                         <tr id="">
-                                                            <td>
-                                                                <input type="text" name="tdID[]" id="tdID[]" class="form-control" value="{{$tdID['tdID']}}">
+                                                            <td width="15%">
+                                                                <label>{{$tdID['tdID']}}</label>
+                                                                <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="{{$tdID['tdID']}}" readonly>
                                                             </td>
-                                                            <td>
-                                                                <input type="text" name="tdNames[]" id="tdNames[]" class="form-control" value="{{$tdID['tdProduct']}}">
+                                                            <td width="55%">
+                                                                <label>{{$tdID['tdProduct']}}</label>
+                                                                <input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="{{$tdID['tdProduct']}}" readonly>
                                                             </td>
-                                                            <td>
-                                                                <input type="text" name="tdVolume[]" id="tdVolume[]" class="form-control" value="{{$tdID['tdVolume']}}">
+                                                            <td width="15%">
+                                                                <label>{{$tdID['tdVolume']}}</label>
+                                                                <input type="text" hidden name="tdVolume[]" id="tdVolume[]" class="form-control" value="{{$tdID['tdVolume']}}" readonly>
                                                             </td>
-                                                            <td>
-                                                                <input type="text" name="tdAmount[]" id="tdAmount[]" class="form-control" value="{{$tdID['tdAmount']}}">
+                                                            <td class="text-lg-right" width="15%">
+                                                                <label>₱ {{$tdID['tdAmount']}}</label>
+                                                                <input type="text" hidden name="tdAmount[]" id="tdAmount[]" class="form-control" value="{{$tdID['tdAmount']}}" readonly>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -65,13 +77,6 @@
                                         <td width="5%">:</td>
                                         <td>{{$response->transaction_type}}</td>
                                     </tr>
-                                    @if(!empty($response->product))
-                                        <tr>
-                                            <td width="25%">Product</td>
-                                            <td width="5%">:</td>
-                                            <td>{{$response->product}}</td>
-                                        </tr>
-                                    @endif
                                     @if(!empty($response->volume))
                                         <tr>
                                             <td width="25%">Volume</td>
@@ -92,11 +97,10 @@
                                         <td>{{$response->payment_method}}</td>
                                     </tr>
                                     <tr>
-                                        <td width="25%" style="font-size: larger; font-weight: 600">Amount</td>
+                                        <td width="25%" style="font-size: larger; font-weight: 600">Total Amount</td>
                                         <td width="5%">:</td>
                                         <td style="font-size: larger; font-weight: 600" class="font-weight-bold">{{number_format($response->amount,2)}}</td>
                                     </tr>
-
                                     </tbody>
                                 </table>
 
@@ -143,7 +147,7 @@
         </div>
     </div>
 
-    <div id="pay_modal" class="modal fade" role="dialog">
+    {{--<div id="pay_modal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-md">
             <div class="modal-content" style="margin-top: 100px">
                 <form id="pay_modal_form">
@@ -192,7 +196,7 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div>--}}
 
 <script type="text/javascript">
     $(document).ready(function(){
@@ -251,19 +255,24 @@
         }).on('filebatchuploadsuccess', function(event, data) {
             console.log(data.response);
             var id = data.response.transaction_id;
-            form = $("#premixProductForm");
-            formData = form.serialize();
-            $.ajax({
-                url : "http://localhost:8001/dashboard/OOP/"+id,
-                data: formData,
-                type: 'POST',
-                success: function (res) {
-                    window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
-                },
-                error: function (res) {
-                    alert("error");
-                }
-            });
+            if(data.response.transaction_code == "PRE"){
+                form = $("#premixProductForm");
+                formData = form.serialize();
+                $.ajax({
+                    url : "http://localhost:8001/dashboard/OOP/"+id,
+                    data: formData,
+                    type: 'POST',
+                    success: function (res) {
+                        window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+                    },
+                    error: function (res) {
+                        alert("error");
+                    }
+                });
+            }
+            else {
+                window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+            }
             $("#transaction_id").html(data.response.transaction_id);
             $("#amountToPay").html("Amount to Pay: Php "+ data.response.amount);
             $("#timestamp").html(data.response.timestamp);

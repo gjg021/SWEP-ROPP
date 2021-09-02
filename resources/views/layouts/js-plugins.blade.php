@@ -51,12 +51,8 @@
 
 {{-- Datatables --}}
 <script type="text/javascript" src="{{ asset('template/plugins/DataTables-Bootstrap4/datatables.min.js') }}"></script>
-
 <script type="text/javascript" src="{{ asset('template/plugins/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
-
-
 <script type="text/javascript" src="{{asset('template/plugins/jquery-confirm/dist/jquery-confirm.min.js')}}"></script>
-
 <script src="{{asset('template/plugins/bootstrap-fileinput/js/plugins/sortable.min.js')}}"></script>
 <script src="{{asset('template/plugins/bootstrap-fileinput/js/plugins/piexif.min.js')}}"></script>
 <script src="{{asset('template/plugins/bootstrap-fileinput/js/fileinput.min.js')}}"></script>

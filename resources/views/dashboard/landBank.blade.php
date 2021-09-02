@@ -57,7 +57,11 @@
                             <td width="5%">:</td>
                             <td width="75%" style="font-size: larger; font-weight: 600" class="font-weight-bold"> {{number_format($response->total_amount,2)}}</td>
                         </tr>
-
+                        <tr>
+                            <td width="20%">Payor</td>
+                            <td width="5%">:</td>
+                            <td width="75%"style="font-weight: 600" class="font-weight-bold"> {{$user->business_name}}</td>
+                        </tr>
                         </tbody>
                     </table>
                     <div class="bg-white shadow-sm pt-4 pl-2 pr-2 pb-2">
