@@ -1,19 +1,20 @@
 <?php
 
 //test commit
-/** Auth **/
-Route::group(['as' => 'auth.'], function () {
-	
-	Route::get('/', 'Auth\LoginController@showLoginForm')->name('showLogin');
-	Route::post('/', 'Auth\LoginController@login')->name('login');
+    /** Auth **/
+    Route::group(['as' => 'auth.'], function () {
 
-	Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
-	Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
-	Route::post('/signup','User\UserController@store')->name('signup');
-    Route::get('/register','User\UserController@showForm')->name('signup.show_form');
+        Route::get('/', 'Auth\LoginController@showLoginForm')->name('showLogin');
+        Route::post('/', 'Auth\LoginController@login')->name('login');
+
+        Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
+        Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+        Route::post('/signup','User\UserController@store')->name('signup');
+        Route::get('/register','User\UserController@showForm')->name('signup.show_form');
+        Route::get('verifyTransaction', 'PaymentController@getTransaction')->name('verifyTransaction');
+    });
     Route::get('verifyTransaction', 'PaymentController@getTransaction')->name('verifyTransaction');
-});
-    Route::get('verifyTransaction', 'PaymentController@getTransaction')->name('verifyTransaction');
+
 	/** Dashboard **/
 	Route::group(['prefix'=>'dashboard', 'as' => 'dashboard.', 'middleware' => ['check.user_status']], function () {
 		/** HOME **/	
@@ -38,6 +39,9 @@ Route::group(['as' => 'auth.'], function () {
 		Route::get('shipping-permits/my-shipping-permits', 'Shared\ShippingPermitController@userIndex')->name('shipping-permits.my-shipping-permits');
 		Route::get('shipping-permits/apply', 'Shared\ShippingPermitController@userShowApply')->name('shipping-permits.apply');
         Route::post('payments/validate_form', 'PaymentController@validateForm')->name('payments.validate_form');
+        Route::get('payments/groupSelected/{id}', 'PaymentController@groupSelected')->name('payments.groupSelected');
+        Route::get('payments/getLabAnalysis', 'PaymentController@getLabAnalysis')->name('payments.getLabAnalysis');
+        Route::get('payments/getLabAnalysisTypes/{id}', 'PaymentController@getLabAnalysisTypes')->name('payments.getLabAnalysisTypes');
         Route::get('payments/view_file', 'PaymentController@view_file')->name('payments.view_file');
 		Route::post('payments/review', 'PaymentController@review')->name('payments.review');
         Route::post('OOP/{id}', 'PaymentController@orderOfPaymentsDetails')->name('OOP');

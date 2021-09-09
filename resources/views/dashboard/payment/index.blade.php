@@ -188,5 +188,10 @@
 
     })
 
+    $("body").on("click",".payNow_btn", function () {
+        tr_id = $(this).attr('data');
+        window.open("http://localhost:8001/dashboard/landBank/"+tr_id, '_blank').focus();
+    })
+
 </script>
 @endsection

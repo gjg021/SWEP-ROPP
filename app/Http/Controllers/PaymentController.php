@@ -78,7 +78,7 @@ class PaymentController extends Controller
 //                          </div>';
                     if($data->expires_on > Carbon::now()){
                         return '<div class="btn-group" role="group" aria-label="Basic example" style="height: 45%">
-                                <button type="button" class="btn btn-success btn-lg btn-outline" data="'.$data->slug.'"><i class="fa fa-rub"></i> Pay Now</button>
+                                <button type="button" class="btn btn-success btn-lg btn-outline payNow_btn" data="'.$data->slug.'"><i class="fa fa-rub"></i> Pay Now</button>
                                 <button type="button" class="btn btn-secondary btn-lg btn-outline view_btn" data="'.$data->slug.'" data-toggle="modal" data-target="#view_modal">View</button>
                             </div>';
                     }
@@ -95,19 +95,48 @@ class PaymentController extends Controller
     }
 
     public function create(){
-        $transaction_type_db = TransactionType::get();
-        $transaction_types = [];
-        if(!empty($transaction_type_db)){
-            foreach ($transaction_type_db as $transaction_type_db){
-                $transaction_types[$transaction_type_db->group][$transaction_type_db->transaction_code] = [
-                    'transaction_code' => $transaction_type_db->transaction_code,
-                    'transaction_type' => $transaction_type_db->transaction_type,
-                    'type' => $transaction_type_db->type,
-                    'amount' => $transaction_type_db->amount,
+        $transaction_type_group_db = User\TransactionTypeGroup::get();
+        $transaction_types_group = [];
+        if(!empty($transaction_type_group_db)){
+            foreach($transaction_type_group_db as $transaction_type_group_db){
+                $transaction_types_group[$transaction_type_group_db->slug] = [
+                    'slug' => $transaction_type_group_db->slug,
+                    'group_name' => $transaction_type_group_db->name,
                 ];
             }
         }
 
+        $sucrose_content_db = SucroseContentModel::get()->first();
+        return view('dashboard.payment.create')->with(['sucrose_contents' => $sucrose_content_db, 'transaction_types_group' => $transaction_types_group]);
+    }
+
+    public function groupSelected($id) {
+        //$transaction_type_db = TransactionType::get();
+        $transaction_type_db = TransactionType::get()->where('transaction_types_group_slug', '=', $id);
+        $transaction_types = [];
+        if(!empty($transaction_type_db)){
+                foreach ($transaction_type_db as $transaction_type_db){
+                    $transaction_types[$transaction_type_db->transaction_types_group_slug][$transaction_type_db->slug] = [
+                        'transaction_code' => $transaction_type_db->slug,
+                        'transaction_type' => $transaction_type_db->name,
+                        'group' => $transaction_type_db->transaction_types_group_slug,
+                        'subgroup' => $transaction_type_db->transaction_types_subgroup_slug,
+                        'unit' => $transaction_type_db->unit,
+                        'fee_per_unit' => $transaction_type_db->fee_per_unit,
+                        'regular_fee' => $transaction_type_db->regular_fee,
+                        'expedite_fee' => $transaction_type_db->expedite_fee,
+                    ];
+                }
+        }
+        return view('dashboard.payment.transactionTypeGroup')->with(['transaction_types' => $transaction_types]);
+    }
+
+    public function getLabAnalysisTypes($id){
+        $transaction_types_lab_analysis_db = User\TransactionTypesLabAnalysis::get()->where('transaction_type_slug', '=', $id);
+        return view('dashboard.payment.labAnalysisTypes')->with(['transaction_types_lab_analysis' => $transaction_types_lab_analysis_db]);
+    }
+
+    public function getLabAnalysis(){
         $lab_analysis_db = LabAnalysis::get()->where('user_slug', '=', $this->auth->guard('web')->user()->slug);
         $lab_analysis = [];
         if(!empty($lab_analysis_db)){
@@ -120,9 +149,7 @@ class PaymentController extends Controller
                 ];
             }
         }
-        $sucrose_content_db = SucroseContentModel::get()->first();
-        //return $transaction_types;
-        return view('dashboard.payment.create')->with(['sucrose_contents' => $sucrose_content_db,'transaction_types' => $transaction_types, 'lab_analysis' => $lab_analysis]);
+        return view('dashboard.payment.labAnalysis')->with(['lab_analysis' => $lab_analysis]);
     }
 
     public function validateForm(){
@@ -135,23 +162,23 @@ class PaymentController extends Controller
             $status_code = 422;
             $errors['transaction_code'] = 'Please select transaction';
         }else{
-            $transaction_type_db = TransactionType::where('transaction_code',$request->transaction_code)->first();
+            $transaction_type_db = TransactionType::where('slug',$request->transaction_code)->first();
             if(empty($transaction_type_db)){                                                                            //IF TRANSACTION IS NOT FOUND IN DATABASE
                 $status_code = 422;
                 $errors['transaction_code'] = 'SRA does not offer this transaction';
             }else{
-                $type = $transaction_type_db->type;
-                $request->transaction_type = $transaction_type_db->transaction_type;
+                $type = $transaction_type_db->unit;
+                $request->transaction_type = $transaction_type_db->name;
                 switch ($type){                                                                                         //CHECK TRANSACTION TYPE USING DB
-                    case 'volume':                                                                                        //IF TRANSACTION AMOUNT MUST BE USER GENERATED
-                        if($transaction_type_db->transaction_code != "PRE" && (!$request->has('amount') || $request->amount == null )){
+                    case 'VOLUME':                                                                                        //IF TRANSACTION AMOUNT MUST BE USER GENERATED
+                        if($transaction_type_db->slug != "PRE" && (!$request->has('amount') || $request->amount == null )){
                             $status_code = 422;
                             $errors['amount'] = 'Please enter a valid amount';
                         }else{
                             return $this->review($request);
                         }
                         break;
-                    case 'static' || 'mt':                                                                                      //IF TRANSACTION AMOUNT IS FIXED OR PRESET
+                    case 'STATIC' || 'MT':                                                                                      //IF TRANSACTION AMOUNT IS FIXED OR PRESET
                         return $this->review($request);
                         break;
                     default:                                                                                            //ELSE
@@ -181,41 +208,40 @@ class PaymentController extends Controller
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
         $payment_method = 'Landbank LinkBiz Portal';
+        //$amount = $request->totalAmount;
+        $amount = 0;
+        $volume = 0;
+        $premixProduct = [];
         if($request->transaction_code == "PRE"){
-            $amount = $request->totalAmount;
+            foreach($request->tdID as $key=>$tdID){
+                $requestAmount = str_replace("₱", "", $request->tdAmount[$key]);
+                $amount += $requestAmount;
+                $volume += $request->tdVolume[$key];
+                $premixProduct[$tdID] = [
+                    'tdID' => $tdID,
+                    'tdProduct' => $request->tdNames[$key],
+                    'tdVolume' => $request->tdVolume[$key],
+                    'tdAmount' => $requestAmount,
+                ];
+            }
         }
-        else {
-            $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$labAnalysisSlug);
+        $response = collect();
+        if($request->transaction_code != "PRE") {
+            if(!empty($request->volume)){
+                $response->volume = $request->volume;
+            }
+            $amount = $this->amountComputer($transaction_code, $request->volume, $request->amount, $labAnalysisSlug);
         }
 
-        $response = collect();
         if(!empty($labAnalysisRepo)){
             $response->product = $labAnalysisRepo->product_description;
         }
         $response->transaction_type = $request->transaction_type;
         $response->amount = $amount;
+        $response->totalVolume = $volume;
         $response->payment_method = $payment_method;
         $response->transaction_code = $request->transaction_code;
-        if($request->transaction_code == "PRE"){
-            $response->totalVolume = $request->totalVolume;
-        }
-        else {
-            if(!empty($request->volume)){
-                $response->volume = $request->volume;
-            }
-        }
 
-        $premixProduct = [];
-        if($request->transaction_code == "PRE"){
-            foreach($request->tdID as $key=>$tdID){
-                $premixProduct[$tdID] = [
-                    'tdID' => $tdID,
-                    'tdProduct' => $request->tdNames[$key],
-                    'tdVolume' => $request->tdVolume[$key],
-                    'tdAmount' => str_replace("₱", "", $request->tdAmount[$key]),
-                ];
-            }
-        }
         return view('dashboard.payment.review')->with(['response'=>$response, 'premixProduct'=>$premixProduct]);
     }
 
@@ -235,15 +261,8 @@ class PaymentController extends Controller
             $transaction_code = $request->transaction_code;
             $user_id = Auth::guard('web')->user()->slug;
             $payment_method = 'Landbank LinkBiz Portal';
-            /*if($this->amountComputer($transaction_code,$request->volume,$request->amount,$request->LabAnalysisName) == 'invalid'){
-                return response()->json([
-                    'error' => "Invalid Computation",
-                ],419);
-            }else{
-                $amount = $this->amountComputer($transaction_code,$request->volume,$request->amount,$request->LabAnalysisName);
-            }*/
 
-            $transaction_type_db = TransactionType::where('transaction_code', $transaction_code)->first();
+            $transaction_type_db = TransactionType::where('slug', $transaction_code)->first();
 
             if (empty($transaction_type_db)) {
                 return [
@@ -255,7 +274,8 @@ class PaymentController extends Controller
 
                 $payment = New OrderOfPayments;
                 $payment->slug = strtoupper($this->hyphenate(str_shuffle(str_random(5) . rand(1000, 9999)))) . '-' . date('my');
-                $payment->transaction_type = $transaction_type_db->transaction_type;
+                $payment->transaction_type_slug = $transaction_type_db->slug;
+                $payment->transaction_type = $transaction_type_db->name;
                 $payment->payment_method = $payment_method;
                 $volume = 0;
                 if($request->transaction_code == "PRE"){
@@ -371,14 +391,14 @@ class PaymentController extends Controller
     }
 
     private function amountComputer($code,$volume,$amount,$labAnalysisSlug){
-        $transaction_type_db = TransactionType::where('transaction_code',$code)->first();
+        $transaction_type_db = TransactionType::where('slug',$code)->first();
         $lab_analysis_db = LabAnalysis::where('slug',$labAnalysisSlug)->first();
         $sucrose_content_db = SucroseContentModel::get()->first();
         if(empty($transaction_type_db)){
             return 'invalid';
         }else{
-            if($transaction_type_db->type == 'volume'){
-                if($transaction_type_db->transaction_code == 'PRE'){
+            if($transaction_type_db->unit == 'VOLUME'){
+                if($transaction_type_db->slug == 'PRE'){
                     if($lab_analysis_db->sucrose == 0){
                         $amount = 300;
                     }
@@ -390,11 +410,11 @@ class PaymentController extends Controller
                     }
                 }
                 else {
-                    $amount = $volume*$transaction_type_db->amount;
+                    $amount = $volume*$transaction_type_db->fee_per_unit;
                 }
             }
-            if($transaction_type_db->type == 'static' || $transaction_type_db->type == 'mt' || $transaction_type_db->type == 'quedan'){
-                $amount = $transaction_type_db->amount;
+            if($transaction_type_db->unit == 'STATIC' || $transaction_type_db->unit == 'MT' || $transaction_type_db->unit == 'QUEDAN'){
+                $amount = $transaction_type_db->regular_fee;
             }
         }
         return $amount;

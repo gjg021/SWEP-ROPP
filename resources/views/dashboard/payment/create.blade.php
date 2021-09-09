@@ -16,20 +16,24 @@
                                 <form id="order_of_payment_form">
                                     @csrf
                                     <div class="row">
-                                        <div class="col-sm-6 form-group">
-                                            <label>Transaction type:</label>
-                                            <select class="form-control form-control-lg" name="transaction_code" id="transaction_type">
+                                        <div class="col-sm-12 form-group">
+                                            <label>Department:</label>
+                                            <select class="form-control form-control-lg" name="transaction_types_group" id="transaction_types_group">
                                                 <option disabled="" selected>Select</option>
-                                                @if(count($transaction_types)> 0)
-                                                    @foreach($transaction_types as $key => $group)
-                                                        <optgroup label="{{$key}}">
-                                                            @foreach($group as $key2 => $trasaction_type)
-                                                                <option transactionCode="{{$trasaction_type['transaction_code']}}" value="{{$key2}}" type="{{$trasaction_type['type']}}" amount="{{$trasaction_type['amount']}}">{{$trasaction_type['transaction_type']}}</option>
-                                                            @endforeach
-                                                        </optgroup>
+                                                @if(count($transaction_types_group)> 0)
+                                                    @foreach($transaction_types_group as $key => $slug)
+                                                        <option value="{{$key}}">{{$slug['group_name']}}</option>
                                                     @endforeach
                                                 @endif
                                             </select>
+                                        </div>
+
+                                        <div class="col-sm-6" id="divTypeGroup">
+
+                                        </div>
+
+                                        <div class="col-sm-6" id="divTransactionTypesLabAnalysis">
+
                                         </div>
                                         <div class="col-sm-6" id="divLabAnalysis">
 
@@ -37,11 +41,6 @@
                                         <div class="col-sm-12" id="amountString">
 
                                         </div>
-                                        {{--                                    <div class="form-group">--}}
-                                        {{--                                        <label>Volume (Lkg/tc)</label>--}}
-                                        {{--                                        <input type="number" class="form-control form-control-lg" placeholder="Lkg/tc" name="volume"> x multiplier--}}
-                                        {{--                                    </div>--}}
-
                                         <div id="amount_container" style="display: none" class="col-sm-6 dynamics">
                                             <div class="form-group">
                                                 <label>Amount: </label>
@@ -49,7 +48,7 @@
                                             </div>
                                         </div>
                                             <div id="volume_container" style="display: none" class="col-sm-6 form-group dynamics">
-                                                <label>Volume (Lkg/tc)</label>
+                                                <label>Volume (Lkg/bag)</label>
                                                 <input type="text" class="form-control form-control-lg" placeholder="Lkg/tc" id="volume" name="volume">
                                             </div>
                                             <div id="volume_container_amount" style="display: none" class="col-sm-6 form-group dynamics">
@@ -138,7 +137,7 @@
         }, 500));
         new AutoNumeric("#amount",autonum_settings);
 
-        $("#transaction_type").change(function(){
+        $("body").on('change', '#transaction_type', function() {
             var t = $(this);
             var option = $("#transaction_type option[value='"+t.val()+"']");
             var type = option.attr('type');
@@ -156,36 +155,42 @@
                 $(this).slideUp();
             })
 
-            if(type == 'volume'){
+            if(type == 'VOLUME'){
                 $("#volume_container").slideDown();
                 $("#volume_container_amount").slideDown();
-            }if(type == 'user'){
+            }if(type == 'USER'){
                 $("#amount_container").slideDown();
             }
 
-            var stringLabAnalysis = "";
             if(option.attr('transactionCode') == 'PRE'){
-                stringLabAnalysis = "<div class='form-group'>";
-                stringLabAnalysis += "<label>Product</label>";
-                stringLabAnalysis += "<div class=\"input-group\">";
-                stringLabAnalysis += "<select class='form-control form-control-lg' name='LabAnalysisName' id='LabAnalysis'>";
-                stringLabAnalysis += "<option disabled='' selected>--Please select--</option>";
-                stringLabAnalysis += "@if(count($lab_analysis)> 0)";
-                stringLabAnalysis += "@foreach($lab_analysis as $key1 => $slug)";
-                stringLabAnalysis += "<option onclick='changeProduct({{$slug['sucrose']}});' id='{{$key1}}' name='{{$slug['product_description']}}' value='{{$key1}}' sucrose='{{$slug['sucrose']}}'>{{$slug['product_description']}}</option>";
-                stringLabAnalysis += "@endforeach";
-                stringLabAnalysis += "@endif";
-                stringLabAnalysis += "</select>";
-                stringLabAnalysis += "<span class=\"input-group-append\">";
-                stringLabAnalysis += "<button type='button' id='addProduct' style='' class='btn btn-info' onclick='addProductToList();'><i class='fa fa-plus-circle' ></i></button>";
-                stringLabAnalysis += "</span>";
-                stringLabAnalysis += "</div>";
-                stringLabAnalysis += "</div>";
-
-
+                $.ajax({
+                    url : "{{route('dashboard.payments.getLabAnalysis')}}",
+                    type: 'GET',
+                    success: function (res) {
+                        $("#divLabAnalysis").html(res);
+                    },
+                    error: function (res) {
+                        console.log(res);
+                        errored(form,res);
+                    }
+                })
                 $("#divProduct").slideDown();
             }
-            $("#divLabAnalysis").html(stringLabAnalysis);
+            else if(option.attr('transactionCode') == 'LAB-010'){
+                var url = "{{route('dashboard.payments.getLabAnalysisTypes', 'transactionCode') }}";
+                var newUrl = url.replace('transactionCode', option.attr('transactionCode'))
+                $.ajax({
+                    url : newUrl,
+                    type: 'GET',
+                    success: function (res) {
+                        $("#divTransactionTypesLabAnalysis").html(res);
+                    },
+                    error: function (res) {
+                        console.log(res);
+                        errored(form,res);
+                    }
+                })
+            }
         })
 
         function addProductToList(){
@@ -194,6 +199,15 @@
             var names = option1.attr('name');
             $("#totalVolume").val(Number($("#totalVolume").val())+Number($("#volume").val()));
             $("#totalAmount").val(Number($("#totalAmount").val())+Number($("#volume_amount").val().replace("₱","")));
+            var table = $('#tbProduct')[0];
+            if (table.rows[option1.attr('id')]) {
+                var tdVol = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdVolume[]"]').val();
+                var tdAmnt = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdAmount[]"]').val();
+                $("#totalVolume").val(Number($("#totalVolume").val())-Number(tdVol));
+                $("#totalAmount").val(Number($("#totalAmount").val())-Number(tdAmnt.replace("₱","")));
+                $('#tbProduct tr[id='+option1.attr('id')+']').remove();
+
+            }
             var tr = '<tr id='+option1.attr('id')+'>' +
                 '<td width="15%"><label>'+option1.attr("id")+'</label> <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="'+option1.attr('id')+'" readonly></td>'+
                 '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="'+names+'" readonly></td>'+
@@ -203,9 +217,11 @@
                 '</tr>';
             $('#tbProduct > tbody').append(tr);
         }
+
         $('#tbProduct > tbody').on('click', '.deleteRow', function() {
             $(this).parent().parent().remove();
         });
+
         function changeProduct(sucCont){
             var stringAmount = '';
             if(sucCont == 0){
@@ -264,6 +280,25 @@
 
                     $('.content-wrapper').html(res);
 
+                },
+                error: function (res) {
+                    console.log(res);
+                    errored(form,res);
+                }
+            })
+        })
+
+        $("#transaction_types_group").change(function(){
+            var t = $(this);
+            var option = $("#transaction_types_group option[value='"+t.val()+"']");
+            var optionID = option.val();
+            var url = "{{route('dashboard.payments.groupSelected', 'optionID') }}";
+            var newUrl = url.replace('optionID', optionID)
+            $.ajax({
+                url : newUrl,
+                type: 'GET',
+                success: function (res) {
+                    $('#divTypeGroup').html(res);
                 },
                 error: function (res) {
                     console.log(res);
