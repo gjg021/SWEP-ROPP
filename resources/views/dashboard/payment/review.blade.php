@@ -147,57 +147,6 @@
         </div>
     </div>
 
-    {{--<div id="pay_modal" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content" style="margin-top: 100px">
-                <form id="pay_modal_form">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><code>LandBank LinkBiz Portal</code></h5>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table">
-                            <tbody>
-                            <tr>
-                                <td>Transaction Type:</td>
-                                <td>{{$response->transaction_type}}</td>
-                            </tr>
-                            @if(!empty($response->product))
-                                <tr>
-                                    <td>Product:</td>
-                                    <td>{{$response->product}}</td>
-                                </tr>
-                            @endif
-                            @if(!empty($response->volume))
-                                <tr>
-                                    <td>Volume:</td>
-                                    <td>{{$response->volume}} Lkg/tc</td>
-                                </tr>
-                            @endif
-                            @if(!empty($response->totalVolume))
-                                <tr>
-                                    <td>Volume:</td>
-                                    <td>{{$response->totalVolume}} Lkg/tc</td>
-                                </tr>
-                            @endif
-                            <tr>
-                                <td>Payment method:</td>
-                                <td>{{$response->payment_method}}</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: larger; font-weight: 600">Amount:</td>
-                                <td style="font-size: larger; font-weight: 600" class="font-weight-bold">{{number_format($response->amount,2)}}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>--}}
-
 <script type="text/javascript">
     $(document).ready(function(){
         uploader = $("#input-100").fileinput({
@@ -259,11 +208,11 @@
                 form = $("#premixProductForm");
                 formData = form.serialize();
                 $.ajax({
-                    url : "http://localhost:8001/dashboard/OOP/"+id,
+                    url : "http://localhost:8004/dashboard/OOP/"+id,
                     data: formData,
                     type: 'POST',
                     success: function (res) {
-                        window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+                        window.open("http://localhost:8004/dashboard/landBank/"+id, '_blank').focus();
                     },
                     error: function (res) {
                         alert("error");
@@ -271,7 +220,7 @@
                 });
             }
             else {
-                window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
+                window.open("http://localhost:8004/dashboard/landBank/"+id, '_blank').focus();
             }
             $("#transaction_id").html(data.response.transaction_id);
             $("#amountToPay").html("Amount to Pay: Php "+ data.response.amount);

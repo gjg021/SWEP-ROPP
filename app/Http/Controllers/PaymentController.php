@@ -120,7 +120,6 @@ class PaymentController extends Controller
                         'transaction_code' => $transaction_type_db->slug,
                         'transaction_type' => $transaction_type_db->name,
                         'group' => $transaction_type_db->transaction_types_group_slug,
-                        'subgroup' => $transaction_type_db->transaction_types_subgroup_slug,
                         'unit' => $transaction_type_db->unit,
                         'fee_per_unit' => $transaction_type_db->fee_per_unit,
                         'regular_fee' => $transaction_type_db->regular_fee,
@@ -204,6 +203,7 @@ class PaymentController extends Controller
     }
 
     public function review(Request $request){
+
         $labAnalysisSlug = $request->LabAnalysisName;
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
@@ -212,6 +212,13 @@ class PaymentController extends Controller
         $amount = 0;
         $volume = 0;
         $premixProduct = [];
+        $transactionTypesLabAnalysis = [];
+        if(!empty($request->transactionTypesLabAnalysis)){
+           foreach($request->transactionTypesLabAnalysis as $transTypesLab => $transTypesLabAnalysis){
+
+           }
+        }
+
         if($request->transaction_code == "PRE"){
             foreach($request->tdID as $key=>$tdID){
                 $requestAmount = str_replace("₱", "", $request->tdAmount[$key]);
@@ -225,6 +232,7 @@ class PaymentController extends Controller
                 ];
             }
         }
+
         $response = collect();
         if($request->transaction_code != "PRE") {
             if(!empty($request->volume)){
@@ -313,7 +321,6 @@ class PaymentController extends Controller
                         'amount' => number_format($payment->total_amount,2),
                         'timestamp' => date('M d, Y | h:i:A', strtotime($payment->created_at))
                     ];
-                    //return view('dashboard.landBank')->with(['response'=>$payment]);
                 }
             } else {
                 return [
@@ -414,6 +421,7 @@ class PaymentController extends Controller
                 }
             }
             if($transaction_type_db->unit == 'STATIC' || $transaction_type_db->unit == 'MT' || $transaction_type_db->unit == 'QUEDAN'){
+
                 $amount = $transaction_type_db->regular_fee;
             }
         }

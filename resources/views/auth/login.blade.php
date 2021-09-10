@@ -134,24 +134,7 @@
 		</div>
 	</div>
 </div>
-	<script type="text/javascript">
-		{{--function yeah(){
-			$.ajax({
-				url : "{{route('verifyTransaction')}}",
-				data: {
-					transactionID : $("#transactionID").val()
-				},
-				method: 'GET',
-				dataType: 'JSON',
-				success: function (res) {
-					window.open("http://localhost:8001/verification", '_blank').focus();
-				},
-				error: function (res) {
 
-				}
-			})
-		}--}}
-	</script>
 @include('layouts.js-plugins')
 <script src="{{asset('modal/js/jquery-3.3.1.min.js')}}"></script>
 <script src="{{asset('modal/js/popper.min.js')}}"></script>

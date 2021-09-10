@@ -16,7 +16,7 @@
                                 <form id="order_of_payment_form">
                                     @csrf
                                     <div class="row">
-                                        <div class="col-sm-12 form-group">
+                                        <div class="col-sm-6 form-group">
                                             <label>Department:</label>
                                             <select class="form-control form-control-lg" name="transaction_types_group" id="transaction_types_group">
                                                 <option disabled="" selected>Select</option>
@@ -142,9 +142,15 @@
             var option = $("#transaction_type option[value='"+t.val()+"']");
             var type = option.attr('type');
             var amount = option.attr('amount');
+            if(option.attr('transGroup') == 'LAB' && amount == 0){
+                amount = option.attr('regularFee');
+            }
+
             var stringAmount = '';
             if(option.attr('transactionCode') != 'PRE'){
-                stringAmount = type!='user'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+                if(amount != 0){
+                    stringAmount = type!='USER'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+                }
             }
 
             $("#amountString").html(stringAmount);
@@ -176,20 +182,25 @@
                 })
                 $("#divProduct").slideDown();
             }
-            else if(option.attr('transactionCode') == 'LAB-010'){
-                var url = "{{route('dashboard.payments.getLabAnalysisTypes', 'transactionCode') }}";
-                var newUrl = url.replace('transactionCode', option.attr('transactionCode'))
-                $.ajax({
-                    url : newUrl,
-                    type: 'GET',
-                    success: function (res) {
-                        $("#divTransactionTypesLabAnalysis").html(res);
-                    },
-                    error: function (res) {
-                        console.log(res);
-                        errored(form,res);
-                    }
-                })
+            else if(option.attr('transGroup') == 'LAB'){
+                if(option.attr('regularFee') != 0){
+                    $("#divTransactionTypesLabAnalysis").html('');
+                }
+                else {
+                    var url = "{{route('dashboard.payments.getLabAnalysisTypes', 'transactionCode') }}";
+                    var newUrl = url.replace('transactionCode', option.attr('transactionCode'))
+                    $.ajax({
+                        url : newUrl,
+                        type: 'GET',
+                        success: function (res) {
+                            $("#divTransactionTypesLabAnalysis").html(res);
+                        },
+                        error: function (res) {
+                            console.log(res);
+                            errored(form,res);
+                        }
+                    })
+                }
             }
         })
 
@@ -222,7 +233,10 @@
             $(this).parent().parent().remove();
         });
 
-        function changeProduct(sucCont){
+        $("body").on('change', '#LabAnalysis', function() {
+            var t = $(this);
+            var option = $("#LabAnalysis option[value='"+t.val()+"']");
+            var sucCont = option.attr('sucrose');
             var stringAmount = '';
             if(sucCont == 0){
                 stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='20%'>Sucrose Content: " + sucCont + "%</td><td width='20%'>Fee: " +  zeroContent + " / Application </td></tr></tbody></table></div>";
@@ -242,7 +256,7 @@
             $("#volume").val('');
             $("#volume_amount").val('');
             $("#amountString").html(stringAmount);
-        }
+        })
 
         $("#volume_container input[name='volume']").keyup(function () {
             var t = $("#transaction_type");
