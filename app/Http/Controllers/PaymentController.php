@@ -203,7 +203,6 @@ class PaymentController extends Controller
     }
 
     public function review(Request $request){
-
         $labAnalysisSlug = $request->LabAnalysisName;
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
@@ -211,14 +210,8 @@ class PaymentController extends Controller
         //$amount = $request->totalAmount;
         $amount = 0;
         $volume = 0;
+
         $premixProduct = [];
-        $transactionTypesLabAnalysis = [];
-        if(!empty($request->transactionTypesLabAnalysis)){
-           foreach($request->transactionTypesLabAnalysis as $transTypesLab => $transTypesLabAnalysis){
-
-           }
-        }
-
         if($request->transaction_code == "PRE"){
             foreach($request->tdID as $key=>$tdID){
                 $requestAmount = str_replace("₱", "", $request->tdAmount[$key]);
@@ -244,13 +237,30 @@ class PaymentController extends Controller
         if(!empty($labAnalysisRepo)){
             $response->product = $labAnalysisRepo->product_description;
         }
+
+        $response->transaction_types_group = $request->transaction_types_group;
         $response->transaction_type = $request->transaction_type;
         $response->amount = $amount;
         $response->totalVolume = $volume;
         $response->payment_method = $payment_method;
         $response->transaction_code = $request->transaction_code;
 
-        return view('dashboard.payment.review')->with(['response'=>$response, 'premixProduct'=>$premixProduct]);
+        $transactionTypesLabAnaly = [];
+        foreach($request->transactionTypesLabAnalysis as $key1){
+            $transaction_types_lab_analysis_db = User\TransactionTypesLabAnalysis::get()->where('slug', '=', $key1);
+            foreach($transaction_types_lab_analysis_db as $key => $slug) {
+                $response->amount += $slug->regular_fee;
+                $transactionTypesLabAnaly[$key1] = [
+                    'slug' => $slug->slug,
+                    'name' => $slug->name,
+                    'transactionTypeSlug' => $slug->transaction_type_slug,
+                    'regularFee' => $slug->regular_fee,
+                    'expediteFee' => $slug->expedite_fee,
+                ];
+            }
+        }
+
+        return view('dashboard.payment.review')->with(['response'=>$response, 'premixProduct'=>$premixProduct, 'transactionTypesLabAnalysis'=>$transactionTypesLabAnaly]);
     }
 
     public function show($id){
@@ -317,6 +327,7 @@ class PaymentController extends Controller
                     return [
                         'status' => 1,
                         'transaction_id' => $payment->slug,
+                        'transaction_types_group' => $request->transaction_types_group,
                         'transaction_code' => $transaction_code,
                         'amount' => number_format($payment->total_amount,2),
                         'timestamp' => date('M d, Y | h:i:A', strtotime($payment->created_at))
@@ -332,16 +343,30 @@ class PaymentController extends Controller
     }
 
     public function orderOfPaymentsDetails(Request $request, $id){
-        foreach($request->tdID as $key=>$tdID){
-        $oOP = new OrderOfPaymentsDetailsModel();
-        $oOP->order_of_payments_slug = $id;
-        $oOP->product = $request->tdNames[$key];
-        $oOP->volume =  $request->tdVolume[$key];
-        $oOP->amount =  $request->tdAmount[$key];
-        $oOP->created_at = Carbon::now();
-        $oOP->user_created = Auth::guard('web')->user()->slug;
-        $oOP->updated_at = Carbon::now();
-        $oOP->save();
+        if(!empty($request->labSlug)){
+            foreach($request->labSlug as $key=>$labSlug){
+                $oOP = new OrderOfPaymentsDetailsModel();
+                $oOP->order_of_payments_slug = $id;
+                $oOP->lab_analysis_type = $request->labName[$key];
+                $oOP->amount =  $request->labRegularFee[$key];
+                $oOP->created_at = Carbon::now();
+                $oOP->user_created = Auth::guard('web')->user()->slug;
+                $oOP->updated_at = Carbon::now();
+                $oOP->save();
+            }
+        }
+        elseif (!empty($request->tdID)){
+            foreach($request->tdID as $key=>$tdID){
+                $oOP = new OrderOfPaymentsDetailsModel();
+                $oOP->order_of_payments_slug = $id;
+                $oOP->product = $request->tdNames[$key];
+                $oOP->volume =  $request->tdVolume[$key];
+                $oOP->amount =  $request->tdAmount[$key];
+                $oOP->created_at = Carbon::now();
+                $oOP->user_created = Auth::guard('web')->user()->slug;
+                $oOP->updated_at = Carbon::now();
+                $oOP->save();
+            }
         }
         exit();
     }
@@ -367,7 +392,7 @@ class PaymentController extends Controller
                 if($user != $owner_of_file){
                     abort(404);
                 }
-                $path = "E:/swep_rd_storage/uploaded_documents/".$file->path;
+                $path = "C:/swep_rd_storage/uploaded_documents/".$file->path;
                 if(!File::exists($path)){
                     abort(500);
                 }

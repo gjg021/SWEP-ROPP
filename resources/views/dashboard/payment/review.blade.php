@@ -29,45 +29,57 @@
                         <div class="row justify-content">
                             <div class="col-md-12">
                                 <h4> Summary</h4>
-                                @if($response->transaction_code == "PRE")
+                                @if($response->transaction_code == "PRE" || $response->transaction_types_group == "LAB")
                                     <form id="premixProductForm">
                                         @csrf
-                                        <div class="form-group">
-                                            <table class="table">
-                                                <thead>
-                                                <tr>
-                                                    <th>Product ID</th>
-                                                    <th>Product</th>
-                                                    <th>Volume</th>
-                                                    <th>Amount</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody id="">
-                                                @if(count($premixProduct)> 0)
-                                                    @foreach($premixProduct as $key1 => $tdID)
-                                                        <tr id="">
-                                                            <td width="15%">
-                                                                <label>{{$tdID['tdID']}}</label>
-                                                                <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="{{$tdID['tdID']}}" readonly>
-                                                            </td>
-                                                            <td width="55%">
-                                                                <label>{{$tdID['tdProduct']}}</label>
-                                                                <input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="{{$tdID['tdProduct']}}" readonly>
-                                                            </td>
-                                                            <td width="15%">
-                                                                <label>{{$tdID['tdVolume']}}</label>
-                                                                <input type="text" hidden name="tdVolume[]" id="tdVolume[]" class="form-control" value="{{$tdID['tdVolume']}}" readonly>
-                                                            </td>
-                                                            <td class="text-lg-right" width="15%">
-                                                                <label>₱ {{$tdID['tdAmount']}}</label>
-                                                                <input type="text" hidden name="tdAmount[]" id="tdAmount[]" class="form-control" value="{{$tdID['tdAmount']}}" readonly>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                        @if($response->transaction_types_group == "LAB")
+                                            <div>
+                                                @foreach($transactionTypesLabAnalysis as $key1)
+                                                    <input type="text" hidden name="labSlug[]" id="labSlug[]" class="form-control" value="{{$key1['slug']}}" readonly>
+                                                    <input type="text" hidden name="labName[]" id="labName[]" class="form-control" value="{{$key1['name']}}" readonly>
+                                                    <input type="text" hidden name="labRegularFee[]" id="labRegularFee[]" class="form-control" value="{{$key1['regularFee']}}" readonly>
+                                                    <input type="text" hidden name="labExpediteFee[]" id="labExpediteFee[]" class="form-control" value="{{$key1['expediteFee']}}" readonly>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if($response->transaction_code == "PRE")
+                                            <div class="form-group">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Product ID</th>
+                                                        <th>Product</th>
+                                                        <th>Volume</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="">
+                                                    @if(count($premixProduct)> 0)
+                                                        @foreach($premixProduct as $key1 => $tdID)
+                                                            <tr id="">
+                                                                <td width="15%">
+                                                                    <label>{{$tdID['tdID']}}</label>
+                                                                    <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="{{$tdID['tdID']}}" readonly>
+                                                                </td>
+                                                                <td width="55%">
+                                                                    <label>{{$tdID['tdProduct']}}</label>
+                                                                    <input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="{{$tdID['tdProduct']}}" readonly>
+                                                                </td>
+                                                                <td width="15%">
+                                                                    <label>{{$tdID['tdVolume']}}</label>
+                                                                    <input type="text" hidden name="tdVolume[]" id="tdVolume[]" class="form-control" value="{{$tdID['tdVolume']}}" readonly>
+                                                                </td>
+                                                                <td class="text-lg-right" width="15%">
+                                                                    <label>₱ {{$tdID['tdAmount']}}</label>
+                                                                    <input type="text" hidden name="tdAmount[]" id="tdAmount[]" class="form-control" value="{{$tdID['tdAmount']}}" readonly>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endif
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @endif
                                     </form>
                                 @endif
                                 <table class="table mb-5">
@@ -75,7 +87,23 @@
                                     <tr>
                                         <td width="25%">Transaction Type</td>
                                         <td width="5%">:</td>
-                                        <td>{{$response->transaction_type}}</td>
+                                        <td>{{$response->transaction_type}}
+                                        </td>
+                                        @if($response->transaction_types_group == "LAB")
+                                        <tr>
+                                            <td width="25%"></td>
+                                            <td width="5%"></td>
+                                            <td>
+                                                <ul style="font-size: x-small">
+
+                                            @foreach($transactionTypesLabAnalysis as $key1)
+                                                    <li>{{$key1['name']}}</li>
+                                            @endforeach
+
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        @endif
                                     </tr>
                                     @if(!empty($response->volume))
                                         <tr>
@@ -160,6 +188,7 @@
             uploadExtraData: {
                 '_token': $("meta[name='csrf-token']").attr('content'),
                 'transaction_code' : "{{$response->transaction_code}}",
+                'transaction_types_group' : "{{$response->transaction_types_group}}",
                 'payment_method' : "{{$response->payment_method}}",
                 @if(!empty($response->volume))
                 'volume' : "{{$response->volume}}",
@@ -167,7 +196,8 @@
                         @if(!empty($response->totalVolume))
                 'totalVolume' : "{{$response->totalVolume}}",
                 @endif
-                'amount' : "{{$response->amount}}",
+                'amount' : "{{$response->amount}}"
+
             },
             maxFileCount: 5,
             minFileCount: 1,
@@ -204,15 +234,15 @@
         }).on('filebatchuploadsuccess', function(event, data) {
             console.log(data.response);
             var id = data.response.transaction_id;
-            if(data.response.transaction_code == "PRE"){
+            if(data.response.transaction_code == "PRE" || data.response.transaction_types_group == "LAB"){
                 form = $("#premixProductForm");
                 formData = form.serialize();
                 $.ajax({
-                    url : "http://localhost:8004/dashboard/OOP/"+id,
+                    url : "http://localhost:8001/dashboard/OOP/"+id,
                     data: formData,
                     type: 'POST',
                     success: function (res) {
-                        window.open("http://localhost:8004/dashboard/landBank/"+id, '_blank').focus();
+                        window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
                     },
                     error: function (res) {
                         alert("error");
@@ -220,7 +250,7 @@
                 });
             }
             else {
-                window.open("http://localhost:8004/dashboard/landBank/"+id, '_blank').focus();
+                window.open("http://localhost:8001/dashboard/landBank/"+id, '_blank').focus();
             }
             $("#transaction_id").html(data.response.transaction_id);
             $("#amountToPay").html("Amount to Pay: Php "+ data.response.amount);

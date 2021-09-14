@@ -35,6 +35,22 @@
                                         <div class="col-sm-6" id="divTransactionTypesLabAnalysis">
 
                                         </div>
+
+                                        <div>
+                                            <table id="" class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Lab Analysis</th>
+                                                    <th>Regular Fee</th>
+                                                    <th>Expedite Fee</th>
+                                                    <th>Check</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
                                         <div class="col-sm-6" id="divLabAnalysis">
 
                                         </div>
@@ -219,6 +235,7 @@
                 $('#tbProduct tr[id='+option1.attr('id')+']').remove();
 
             }
+
             var tr = '<tr id='+option1.attr('id')+'>' +
                 '<td width="15%"><label>'+option1.attr("id")+'</label> <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="'+option1.attr('id')+'" readonly></td>'+
                 '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="'+names+'" readonly></td>'+
@@ -308,6 +325,9 @@
             var optionID = option.val();
             var url = "{{route('dashboard.payments.groupSelected', 'optionID') }}";
             var newUrl = url.replace('optionID', optionID)
+            if(optionID != "LAB"){
+                $("#divTransactionTypesLabAnalysis").slideUp();
+            }
             $.ajax({
                 url : newUrl,
                 type: 'GET',
