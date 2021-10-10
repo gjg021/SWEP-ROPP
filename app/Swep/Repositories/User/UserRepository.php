@@ -43,27 +43,31 @@ class UserRepository extends BaseRepository implements UserInterface {
     public function store($request){
         $user = new User;
         $user->slug = $request->slug;
-        $user->first_name = $request->first_name;
-        $user->middle_name = $request->middle_name;
-        $user->last_name = $request->last_name;
-        $user->birthday = $request->birthday;
-        $user->email = $request->email;
         $user->username = $request->username;
         $user->password = Hash::make($request->password);
+        $user->last_name = $request->lastName;
+        $user->first_name = $request->firstName;
+        $user->middle_name = $request->middleName;
+        $user->phone = $request->phone;
+        $user->email = $request->email;
+        $user->birthday = $request->birthday;
+        $user->street = $request->street;
+        $user->barangay = $request->barangay;
+        $user->city = $request->city;
+        $user->region = $request->region;
+        $user->province = $request->province;
+        $user->business_name = $request->busineseName;
+        $user->business_tin = $request->businessTin;
+        $user->business_phone = $request->businessPhone;
+        $user->position = $request->position;
+        $user->business_street = $request->businessStreet;
+        $user->business_barangay = $request->businessbarangay;
+        $user->business_city = $request->businessCity;
         $user->remember_token = $request->remember_token;
         $user->created_at = $this->carbon->now();
         $user->updated_at = $this->carbon->now();
         //$user->is_active = $request->is_active;
         //$user->is_verified = $request->is_verified;
-        $user->phone = $request->phone;
-        $user->business_name = $request->business_name;
-        $user->business_tin = $request->business_tin;
-        $user->business_phone = $request->business_phone;
-        $user->region = $request->region;
-        $user->province = $request->province;
-        $user->municipality = $request->municipality;
-        $user->barangay = $request->barangay;
-        $user->address = $request->address;
 
         if(!$user->save()){
             abort(500,'Error saving data.');
@@ -71,17 +75,9 @@ class UserRepository extends BaseRepository implements UserInterface {
         return $user;
     }
 
-
-
-
     public function update($request, $slug){
 
-       
-
     }
-
-
-
 
     public function destroy($slug){
 
@@ -96,9 +92,6 @@ class UserRepository extends BaseRepository implements UserInterface {
                 ->first();
         return $user;
     }
-
-
-
 
     public function getRaw(){
         

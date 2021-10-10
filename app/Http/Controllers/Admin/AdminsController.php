@@ -29,7 +29,6 @@ class AdminsController extends Controller
 
     public function index()
     {
-
         if(request()->ajax())
         {   
             $data = request();
@@ -76,19 +75,16 @@ class AdminsController extends Controller
         
     }
 
-   
     public function store(AdminFormRequest $request)
     {
         return $this->admin_service->store($request);
     }
-
     
     public function show($id)
     {
         //
     }
 
-    
     public function edit($slug)
     {
         $admin = $this->admin_service->fetch($slug);
@@ -102,14 +98,11 @@ class AdminsController extends Controller
         ]);
     }
 
-    
     public function update(AdminFormRequest $request, $slug)
     {
-
         return $this->admin_service->update($request,$slug);
     }
 
-    
     public function destroy($slug)
     {
         return $this->admin_service->destroy($slug);

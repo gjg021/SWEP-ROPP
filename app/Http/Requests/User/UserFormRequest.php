@@ -7,17 +7,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 
 class UserFormRequest extends FormRequest{
-
-
-
     public function authorize(){
-
         return true;
-        
     }
 
-
-    
     public function rules(){
 
         $rules = [
@@ -37,12 +30,12 @@ class UserFormRequest extends FormRequest{
             'business_name' => 'required|string|max:99',
             'business_tin' => 'required|int|max:999999999999',
             'business_phone' => 'required|string|max:45',
-//            'username'=>'required|string|max:45|unique:users,username',
+//           'username'=>'required|string|max:45|unique:users,username',
             'password'=>'sometimes|required|string|min:6|max:45|same:password_confirmation',
             'password_confirmation'=>'sometimes|required|string|min:6|max:45|same:password',
         ];
 
-    
+
 
         return $rules;
 

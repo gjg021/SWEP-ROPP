@@ -37,6 +37,13 @@ class PaymentController extends Controller
         parent::__construct();
     }
 
+    public function printTransaction(Request $request){
+        $op = OrderOfPayments::where('slug', $request->transactionId)->first();
+        $client = User::where('slug', $op->client_slug)->first();
+        $opDetails = User\OrderOfPaymentsDetailsModel::where('order_of_payments_slug', $op->slug)->get();
+        return view('dashboard.payment.printTrans')->with(['op' => $op, 'client' => $client, 'opDetails' => $opDetails]);
+    }
+
     public function index(){
         if(request()->ajax()){
             $order_of_payments = OrderOfPayments::where('user_created',Auth::guard('web')->user()->slug);
@@ -132,7 +139,7 @@ class PaymentController extends Controller
 
     public function getLabAnalysisTypes($id){
         $transaction_types_lab_analysis_db = User\TransactionTypesLabAnalysis::get()->where('transaction_type_slug', '=', $id);
-        return view('dashboard.payment.labAnalysisTypes')->with(['transaction_types_lab_analysis' => $transaction_types_lab_analysis_db]);
+        return view('dashboard.payment.labAnalysisTypes')->with(['transaction_types_lab_analysis' => $transaction_types_lab_analysis_db, 'iD' => $id]);
     }
 
     public function getLabAnalysis(){
@@ -159,36 +166,23 @@ class PaymentController extends Controller
         //Validate transaction type
         if(!$request->has('transaction_code')){                                                                     //IF TRANSACTION TYPE IS NOT SET
             $status_code = 422;
-            $errors['transaction_code'] = 'Please select transaction';
+            $errors['message'] = 'Please select transaction';
         }else{
             $transaction_type_db = TransactionType::where('slug',$request->transaction_code)->first();
             if(empty($transaction_type_db)){                                                                            //IF TRANSACTION IS NOT FOUND IN DATABASE
                 $status_code = 422;
-                $errors['transaction_code'] = 'SRA does not offer this transaction';
+                $errors['message'] = 'SRA does not offer this transaction';
             }else{
                 $type = $transaction_type_db->unit;
-                $request->transaction_type = $transaction_type_db->name;
-                switch ($type){                                                                                         //CHECK TRANSACTION TYPE USING DB
-                    case 'VOLUME':                                                                                        //IF TRANSACTION AMOUNT MUST BE USER GENERATED
-                        if($transaction_type_db->slug != "PRE" && (!$request->has('amount') || $request->amount == null )){
-                            $status_code = 422;
-                            $errors['amount'] = 'Please enter a valid amount';
-                        }else{
-                            return $this->review($request);
-                        }
-                        break;
-                    case 'STATIC' || 'MT':                                                                                      //IF TRANSACTION AMOUNT IS FIXED OR PRESET
-                        return $this->review($request);
-                        break;
-                    default:                                                                                            //ELSE
-                        if(!$request->has($type) || $request->$type == null || !is_numeric($request->$type)){
-                            $status_code = 422;
-                            $errors[$type] = 'Please enter a valid '.$type;
-                        }else{
-                            return $this->review($request);
-                            $status_code = 200;
-                        }
-                        break;
+                //if($type != 'STATIC'){
+                //    if($request->volume == 0 || $request->volume == null){
+                 //       $status_code = 422;
+                //        $errors['message'] = 'Please provide volume.';
+                 //   }
+                //}
+                if($status_code == 404){
+                    $request->transaction_type = $transaction_type_db->name;
+                    return $this->review($request);
                 }
             }
         }
@@ -197,7 +191,7 @@ class PaymentController extends Controller
             return 1;
         }else{
             return response()->json([
-                'errors'=>$errors
+                'message'=>$errors
             ], $status_code);
         }
     }
@@ -207,22 +201,32 @@ class PaymentController extends Controller
         $labAnalysisRepo = $this->labAnalysisRepo->findBySlug($labAnalysisSlug);
         $transaction_code = $request->transaction_code;
         $payment_method = 'Landbank LinkBiz Portal';
-        //$amount = $request->totalAmount;
         $amount = 0;
         $volume = 0;
 
         $premixProduct = [];
         if($request->transaction_code == "PRE"){
-            foreach($request->tdID as $key=>$tdID){
-                $requestAmount = str_replace("₱", "", $request->tdAmount[$key]);
-                $amount += $requestAmount;
-                $volume += $request->tdVolume[$key];
-                $premixProduct[$tdID] = [
-                    'tdID' => $tdID,
-                    'tdProduct' => $request->tdNames[$key],
-                    'tdVolume' => $request->tdVolume[$key],
-                    'tdAmount' => $requestAmount,
-                ];
+            if(empty($request->tdID)){
+                $errors['message'] = 'Please make sure to click the plus (+) button after selecting the product and please provide volume.';
+                return response()->json([
+                    'message'=>$errors
+                ], 422);
+            }
+            else {
+                foreach($request->tdID as $key=>$tdID){
+                    if($request->tdVolume[$key] == null){
+                        $request->tdVolume[$key] = 0;
+                    }
+                    $requestAmount = $request->tdAmount[$key];
+                    $amount += $requestAmount;
+                    $volume += $request->tdVolume[$key];
+                    $premixProduct[$tdID] = [
+                        'tdID' => $tdID,
+                        'tdProduct' => $request->tdNames[$key],
+                        'tdVolume' => $request->tdVolume[$key],
+                        'tdAmount' => $requestAmount,
+                    ];
+                }
             }
         }
 
@@ -246,34 +250,33 @@ class PaymentController extends Controller
         $response->transaction_code = $request->transaction_code;
 
         $transactionTypesLabAnaly = [];
-        foreach($request->transactionTypesLabAnalysis as $key1){
-            $transaction_types_lab_analysis_db = User\TransactionTypesLabAnalysis::get()->where('slug', '=', $key1);
-            foreach($transaction_types_lab_analysis_db as $key => $slug) {
-                $response->amount += $slug->regular_fee;
+        if(!empty($request->tdLabSlugs)) {
+            foreach($request->tdLabSlugs as $key1=>$tdLabSlugs){
+                $amount += $request->tdLabFees[$key1];
+                $response->amount += $request->tdLabFees[$key1];
                 $transactionTypesLabAnaly[$key1] = [
-                    'slug' => $slug->slug,
-                    'name' => $slug->name,
-                    'transactionTypeSlug' => $slug->transaction_type_slug,
-                    'regularFee' => $slug->regular_fee,
-                    'expediteFee' => $slug->expedite_fee,
+                    'isExpedite' => $request->isExpedite[$key1],
+                    'slug' => $tdLabSlugs,
+                    'name' => $request->tdLabNames[$key1],
+                    'amount' => $request->tdLabFees[$key1],
                 ];
             }
         }
-
         return view('dashboard.payment.review')->with(['response'=>$response, 'premixProduct'=>$premixProduct, 'transactionTypesLabAnalysis'=>$transactionTypesLabAnaly]);
     }
 
     public function show($id){
         if(Auth::guard('web')->check()){
             $op = OrderOfPayments::where('slug',$id)->first();
-            return view('dashboard.payment.show')->with(['op' => $op]);
+            $opDetails = User\OrderOfPaymentsDetailsModel::where('order_of_payments_slug', $op->slug)->get();
+            return view('dashboard.payment.show')->with(['op' => $op, 'opDetails' => $opDetails]);
         }
     }
 
     public function store(PaymentFormRequest $request){
         if(!$request->has('transaction_code') || $request->transaction_code == null){
             return [
-                'error' => "Invalid Transaction1",
+                'message' => "Invalid Transaction1",
             ];
         }else {
             $transaction_code = $request->transaction_code;
@@ -284,7 +287,7 @@ class PaymentController extends Controller
 
             if (empty($transaction_type_db)) {
                 return [
-                    'error' => "Invalid Transactions",
+                    'message' => "Invalid Transactions",
                 ];
             }
 
@@ -306,6 +309,9 @@ class PaymentController extends Controller
                 $payment->total_amount = $request->amount;
                 $payment->status = "TO PAY";
                 $payment->expires_on = Carbon::now()->addDays(3);
+
+                $payment->client_slug = Auth::guard('web')->user()->slug;
+
                 $payment->user_created = Auth::guard('web')->user()->slug;
                 $payment->user_updated = Auth::guard('web')->user()->slug;
 
@@ -335,7 +341,7 @@ class PaymentController extends Controller
                 }
             } else {
                 return [
-                    'error' => 'Please attach supporting documents.',
+                    'message' => 'Please attach supporting documents.',
                 ];
             }
         }
@@ -343,12 +349,13 @@ class PaymentController extends Controller
     }
 
     public function orderOfPaymentsDetails(Request $request, $id){
-        if(!empty($request->labSlug)){
-            foreach($request->labSlug as $key=>$labSlug){
+        if(!empty($request->tdLabSlugs)){
+            foreach($request->tdLabSlugs as $key=>$tdLabSlugs){
                 $oOP = new OrderOfPaymentsDetailsModel();
                 $oOP->order_of_payments_slug = $id;
-                $oOP->lab_analysis_type = $request->labName[$key];
-                $oOP->amount =  $request->labRegularFee[$key];
+                $oOP->lab_analysis_type = $request->tdLabNames[$key];
+                $oOP->is_expedite = $request->isExpedite[$key]=="TRUE"?true:false;
+                $oOP->amount =  $request->tdLabFees[$key];
                 $oOP->created_at = Carbon::now();
                 $oOP->user_created = Auth::guard('web')->user()->slug;
                 $oOP->updated_at = Carbon::now();
@@ -406,18 +413,16 @@ class PaymentController extends Controller
             }else{
                 abort(404);
             }
-        }else{
+        }else {
             abort(404);
         }
-
-
     }
 
     private function hyphenate($str) {
         return implode("-", str_split($str, 3));
     }
     private function standardInt($val){
-        $val = str_replace('₱','',$val);
+        $val = str_replace('PHP','',$val);
         $val = str_replace(',','',$val);
         return $val;
     }
@@ -427,9 +432,10 @@ class PaymentController extends Controller
         $lab_analysis_db = LabAnalysis::where('slug',$labAnalysisSlug)->first();
         $sucrose_content_db = SucroseContentModel::get()->first();
         if(empty($transaction_type_db)){
-            return 'invalid';
+            return 'message';
         }else{
-            if($transaction_type_db->unit == 'VOLUME'){
+            $amount = $transaction_type_db->regular_fee;
+            if($transaction_type_db->unit != 'STATIC'){
                 if($transaction_type_db->slug == 'PRE'){
                     if($lab_analysis_db->sucrose == 0){
                         $amount = 300;
@@ -444,10 +450,6 @@ class PaymentController extends Controller
                 else {
                     $amount = $volume*$transaction_type_db->fee_per_unit;
                 }
-            }
-            if($transaction_type_db->unit == 'STATIC' || $transaction_type_db->unit == 'MT' || $transaction_type_db->unit == 'QUEDAN'){
-
-                $amount = $transaction_type_db->regular_fee;
             }
         }
         return $amount;

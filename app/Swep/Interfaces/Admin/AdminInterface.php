@@ -13,7 +13,5 @@ interface AdminInterface {
 	public function update($request, $slug);
 
 	public function destroy($slug);
-
-
 		
 }

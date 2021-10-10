@@ -44,3 +44,5 @@
 
 <script type="text/javascript" src="{{asset('template/plugins/jquery-confirm/dist/jquery-confirm.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('template/plugins/typeahead/js/bootstrap-typeahead.min.js')}}"></script>
+
+<script src="{{ asset('template/inspinia/js/plugins/sweetalert/sweetalert.min.js') }}"></script>

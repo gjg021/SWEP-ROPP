@@ -15,9 +15,7 @@ class UserService extends BaseService{
 
 
     public function __construct(UserRepository $user_repo){
-
         $this->user_repo = $user_repo;
-
     }
 
 
@@ -25,17 +23,9 @@ class UserService extends BaseService{
         return $this->user_repo->fetchTable($data);
     }
 
-
-
     public function fetch($slug){
-  
 
     }
-
-
-
-
-
 
     public function store($request){
         $new_slug = $this->new_slug();
@@ -101,54 +91,25 @@ class UserService extends BaseService{
         }
     }
 
-
-
-
-
-
-
     public function show($slug){
 
-    
-
     }
-
-
-
-
-
 
     public function edit($slug){
 
-      
-
     }
-
-
-
-
 
     public function update($request, $slug){
 
-
-
     }
 
-
-
-
-
     public function destroy($slug){
-
       return $this->user_repo->destroy($slug);
-
     }
 
     public function verifyEmail($request){
         return $this->user_repo->verifyEmail($request);
     }
-
-
 
     public function new_slug(){
 

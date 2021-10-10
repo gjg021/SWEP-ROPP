@@ -7,9 +7,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\User\OrderOfPayments;
+use App\Models\User\SupportingDocuments;
 use App\Swep\Repositories\Admin\OrderOfPaymentRepository;
 use Carbon\Carbon;
 use DataTables;
+use File;
 class OrderOfPaymentsController extends Controller
 {
     protected $op_repo;
@@ -25,9 +27,6 @@ class OrderOfPaymentsController extends Controller
             return DataTables::eloquent($this->op_repo->fetchTable($data))
                 ->addColumn('action', function($data){
                     $button = '<div class="btn-group">
-                                <button type="button" data="'.$data->slug.'" class="btn btn-success btn-sm update_btn" data-toggle="modal" data-target="#update_modal" title="PAID" data-placement="top">
-                                    <i class="fa fa-edit"></i>
-                                </button>
                                 <button type="button" class="btn btn-primary btn-sm view_btn" data="'.$data->slug.'" data-toggle="modal" title="VIEW" data-target="#view_modal">
                                     <i class="fa fa-search-plus"></i>
                                  </button>
@@ -62,11 +61,40 @@ class OrderOfPaymentsController extends Controller
     public function show($id){
             $op = OrderOfPayments::where('slug',$id)->first();
             $user = User::where('slug',$op->user_created)->first();
-            return view('admin.payments.show')->with(['op' => $op, 'user' => $user]);
+            $opDetails = User\OrderOfPaymentsDetailsModel::where('order_of_payments_slug', $op->slug)->get();
+
+            return view('admin.payments.show')->with(['op' => $op, 'user' => $user, 'opDetails' => $opDetails]);
     }
 
     public function edit($id){
         $opUp = $this->op_repo->update($id);
         return view('admin.payments.update')->with(['op' => $opUp]);
+    }
+
+    public function view_file(){
+        if(!empty(request()->file)){
+            $file = SupportingDocuments::with('orderOfPayment')->find(request()->file);
+            if($file->count() > 0){
+                $owner_of_file = $file->orderOfPayment->user_created;
+                if('936501743' != $owner_of_file){
+                    abort(404);
+                }
+                $path = "C:/swep_rd_storage/uploaded_documents/".$file->path;
+                if(!File::exists($path)){
+                    abort(500);
+                }
+
+                $file = File::get($path);
+                $type = File::mimeType($path);
+                $response = response()->make($file, 200);
+                $response->header("Content-Type", $type);
+                $response->header('Content-Disposition', 'filename="downloaded.pdf"');
+                return $response;
+            }else{
+                abort(404);
+            }
+        }else{
+            abort(404);
+        }
     }
 }

@@ -1,6 +1,5 @@
 
 <?php
-
   $table_sessions = [ 
                       Session::get('USER_UPDATE_SUCCESS_SLUG'), 
                       Session::get('USER_ACTIVATE_SUCCESS_SLUG'),

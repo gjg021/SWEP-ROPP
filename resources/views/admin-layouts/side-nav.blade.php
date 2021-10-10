@@ -27,6 +27,12 @@
 
         </li>
  --}}
+        <li>
+            <a href="{{route('admin.home')}}">
+                <i class="fa fa-home"></i>
+                <span class="nav-label">Home</span>
+            </a>
+        </li>
         @if(count($global_admin_menus) > 0)
           @foreach($global_admin_menus as $key => $label)
             @if($key != '')

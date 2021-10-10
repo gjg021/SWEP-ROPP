@@ -35,3 +35,5 @@
 {{-- JQUERY CONFIRM --}}
 <link rel="stylesheet" href="{{asset('template/plugins/jquery-confirm/dist/jquery-confirm.min.css')}}">
 
+<link href="{{asset('template/inspinia/css/plugins/sweetalert/sweetalert.css')}}" rel="stylesheet">
+

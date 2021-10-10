@@ -49,20 +49,12 @@
 								</tr>
 							</thead>
 							<tbody>
-								
-								
 							</tbody>
 			          	</table>
 			        </div>
-					
 				</div>
-				
 			</div>
-		
     </section>
-
-		
-
 
 @endsection
 
@@ -107,7 +99,6 @@
 
 		    						{!! __form::a_textbox( 12,'Confirm Password','password_confirmation', 'password', 'Confirm Password','', '')!!}
 
-					        		
 		    					</div>
     						</div>
     					</div>
@@ -117,7 +108,6 @@
     						<div class="panel-heading">
     							Administrator Menus and Functions
     						</div>
-
     						<div class="panel-body">
     							<div class="row">
     								@if($menus->get()->count() > 0)
@@ -158,7 +148,6 @@
 								                </div>	
 		    								</div>
 	    								@endforeach
-
     								@endif
     							</div>
     						</div>
@@ -187,7 +176,6 @@
 {{-- Add Function Modal --}}
 <div id="add_function_modal" class="modal fade" role="dialog">
 	<div class="modal-dialog modal-sm">
-
 		<div class="modal-content" style="margin-top: 100px">
 			<form id="add_funtion_form">
 				@csrf
@@ -208,18 +196,12 @@
 				</div>
 			</form>
 		</div>
-
 	</div>
 </div>
-
-
 
 @endsection
 @section('scripts')
 <script type="text/javascript">
-	
-
-
 	$(document).ready(function(){
 		active = '';
 		admins_tbl =  $("#admins_table").DataTable({
@@ -271,8 +253,6 @@
 		});
 	});	
 
-
-	
 	$("#add_admin_form").submit(function(e){
 		e.preventDefault();
 		form = $(this);
@@ -361,17 +341,5 @@
 		percentage = selected/total*100;
 		$(".progress-bar[menu='"+t.attr('menu')+"']").css('width',percentage+'%')
 	})
-	// $("#test_btn").click(function(){
-	// 	$.ajax({
-	// 		url:'{{route("admin.admins.test")}}',
-	// 		type: 'GET',
-	// 		success: function(response){
-	// 			console.log(response);
-	// 		},
-	// 		error: function(response){
-	// 			console.log(response);
-	// 		}
-	// 	})
-	// })
 </script>
 @endsection

@@ -4,7 +4,6 @@ namespace App\Swep\Repositories\Admin;
  
 use App\Swep\BaseClasses\Admin\BaseRepository;
 use App\Swep\Interfaces\Admin\AdminInterface;
-use App\Swep\Repositories\Admin\MenuRepository;
 
 
 use App\Models\Admin;

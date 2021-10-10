@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Models\User\PreRegistrationModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserFormRequest;
@@ -16,20 +18,17 @@ class UserController extends Controller
 
         parent::__construct();
     }
-    
+
     public function index()
     {
-        
         return view('admin.user.index');
     }
 
-    
     public function create()
     {
         
     }
 
-    
     public function store(UserFormRequest $request)
     {
         //return $request;
@@ -40,7 +39,6 @@ class UserController extends Controller
    
     public function showForm()
     {
-
         return view('auth.signup');
     }
 

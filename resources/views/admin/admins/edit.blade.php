@@ -4,7 +4,6 @@
 	{{$admin->fullname}} | <span class="label label-primary">EDIT</span>
 @endsection
 
-
 @section('modal-body')
 <div class="row">
 	<div class="col-md-3">

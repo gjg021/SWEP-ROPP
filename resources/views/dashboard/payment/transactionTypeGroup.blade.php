@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label>Transaction type:</label>
+<div class="form-group m-t-sm">
+    <label><strong>Transaction type:</strong></label>
     <select class="form-control form-control-lg" name="transaction_code" id="transaction_type">
         @if(count($transaction_types)> 0)
             <option disabled="" selected>Select</option>

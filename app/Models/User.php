@@ -10,37 +10,39 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable{
 
-
     use Notifiable, Sortable;
-
-
 
     public $timestamps = false;
     protected $hidden = ['password', 'remember_token',];
 
 
     protected $attributes = [
-    
-        'first_name' => '',
-        'middle_name' => '',
-        'last_name' => '',
-        'birthday' => null,
-        'email' => '',
+
         'username' => '',
         'password' => '',
+        'last_name' => '',
+        'first_name' => '',
+        'middle_name' => '',
+        'phone' => '',
+        'email' => '',
+        'birthday' => null,
+        'street' => '',
+        'barangay' => '',
+        'city' => '',
+        'region' => '',
+        'province' => '',
+        'business_name' => '',
+        'business_tin' => '',
+        'business_phone' => '',
+        'position' => '',
+        'business_street' => '',
+        'business_barangay' => '',
+        'business_city' => '',
+        'is_active' => 1,
+        'is_verified' => 1,
         'remember_token' => '',
         'created_at' => '',
         'updated_at' => '',
-        'is_active' => 1,
-        'is_verified' => 0,
-        'phone' => '',
-        'region' => '',
-        'province' => '',
-        'municipality' => '',
-        'barangay' => '',
-        'address' => '',
-   
-
     ];
 
 

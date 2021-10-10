@@ -1,116 +1,105 @@
 @extends('layouts.admin-master')
 @section('content')
-    <div class="row page-title-header">
-        <div class="col-12">
-            <div class="page-header">
-                <h4 class="page-title">Payment</h4>
-            </div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>Payment</h2>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row justify-content">
-                            <div class="card-title">
-                                <form id="order_of_payment_form">
-                                    @csrf
-                                    <div class="row">
-                                        <div class="col-sm-6 form-group">
-                                            <label>Department:</label>
-                                            <select class="form-control form-control-lg" name="transaction_types_group" id="transaction_types_group">
-                                                <option disabled="" selected>Select</option>
-                                                @if(count($transaction_types_group)> 0)
-                                                    @foreach($transaction_types_group as $key => $slug)
-                                                        <option value="{{$key}}">{{$slug['group_name']}}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                        </div>
+    <div class="wrapper wrapper-content animated fadeIn">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <form id="order_of_payment_form">
+                            @csrf
+                            <div class="row">
+                                <div class="col-md-6 form-group m-t-sm">
+                                    <label><strong>Department:</strong></label>
+                                    <select class="form-control form-control-lg" name="transaction_types_group" id="transaction_types_group">
+                                        <option disabled="" selected>Select</option>
+                                        @if(count($transaction_types_group)> 0)
+                                            @foreach($transaction_types_group as $key => $slug)
+                                                <option value="{{$key}}">{{$slug['group_name']}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
 
-                                        <div class="col-sm-6" id="divTypeGroup">
+                                <div class="col-md-6" id="divTypeGroup">
 
-                                        </div>
+                                </div>
 
-                                        <div class="col-sm-6" id="divTransactionTypesLabAnalysis">
+                                <div class="col-md-12" id="divTransactionTypesLabAnalysis">
 
-                                        </div>
+                                </div>
 
-                                        <div>
-                                            <table id="" class="table">
-                                                <thead>
-                                                <tr>
-                                                    <th>Lab Analysis</th>
-                                                    <th>Regular Fee</th>
-                                                    <th>Expedite Fee</th>
-                                                    <th>Check</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                <div class="col-md-6" id="divLabAnalysis">
 
-                                        <div class="col-sm-6" id="divLabAnalysis">
+                                </div>
+                                <div class="col-md-6" id="amountString">
 
-                                        </div>
-                                        <div class="col-sm-12" id="amountString">
-
-                                        </div>
-                                        <div id="amount_container" style="display: none" class="col-sm-6 dynamics">
-                                            <div class="form-group">
-                                                <label>Amount: </label>
-                                                <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
-                                            </div>
-                                        </div>
-                                            <div id="volume_container" style="display: none" class="col-sm-6 form-group dynamics">
-                                                <label>Volume (Lkg/bag)</label>
-                                                <input type="text" class="form-control form-control-lg" placeholder="Lkg/tc" id="volume" name="volume">
-                                            </div>
-                                            <div id="volume_container_amount" style="display: none" class="col-sm-6 form-group dynamics">
-                                                <label>Amount: </label>
-                                                <input type="text" name="volume_amount" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
-                                            </div>
-
-                                            <div class="form-group" style="display: none">
-                                                <label>Total Volume</label>
-                                                <input id="totalVolume" name="totalVolume" type="text" class="form-control form-control-lg" placeholder="Lkg/tc">
-                                            </div>
-                                            <div class="form-group" style="display: none">
-                                                <label>Total Amount</label>
-                                                <input type="text" name="totalAmount" id="totalAmount" class="form-control form-control-lg" value="0" readonly>
-                                            </div>
+                                </div>
+                                <div id="amount_container" style="display: none" class="col-sm-6 dynamics">
+                                    <div class="form-group">
+                                        <label><strong>Amount: </strong></label>
+                                        <input type="text" id="amount" name="amount" class="form-control form-control-lg" placeholder="00.00" autocomplete="off">
                                     </div>
+                                </div>
+
+                                <div id="volume_container" style="display: none" class="col-sm-6 form-group dynamics">
+                                    <label><strong>Volume</strong></label>
+                                    <input type="text" onkeypress="return isNumberKey(event)" maxlength="9" minlength="1" class="form-control form-control-lg" placeholder="Lkg/tc" id="volume" name="volume">
+                                </div>
+                                <div id="volume_container_amount" style="display: none" class="col-sm-4 form-group dynamics">
+                                    <label><strong>Amount: </strong></label>
+                                    <input type="text" name="volume_amount" id="volume_amount" class="form-control form-control-lg" value="0.00" readonly>
+                                </div>
+
+                                <div id="divBtnAddProduct" class="form-group col-sm-2 dynamics m-t-md" style="display: none">
+                                    <button type='button' id='addProduct' class='btn btn-outline btn-primary dim' onclick='addProductToList();'><i class='fa fa-plus' ></i></button>
+                                </div>
+
+                                <div class="form-group" style="display: none">
+                                    <label>Total Volume</label>
+                                    <input id="totalVolume" name="totalVolume" type="text" class="form-control form-control-lg" placeholder="Lkg/tc">
+                                </div>
+                                <div class="form-group" style="display: none">
+                                    <label>Total Amount</label>
+                                    <input type="text" name="totalAmount" id="totalAmount" class="form-control form-control-lg" value="0" readonly>
+                                </div>
+                                <div id="divProduct" style="display: none" class="table-responsive dynamics col-sm-12">
+                                    <table id="tbProduct" class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Product ID</th>
+                                            <th>Product</th>
+                                            <th>Volume</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-12 m-b-lg">
                                     <button id="btnProceed" type="submit" class="btn btn-primary center"><i class="fa fa-caret-right"></i> Proceed</button>
-                                    <div id="divProduct" style="display: none" class="dynamics mt-lg-3">
-                                        <table id="tbProduct" class="table">
-                                            <thead>
-                                            <tr>
-                                                <th>Product ID</th>
-                                                <th>Product</th>
-                                                <th>Volume</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </form>
+                                </div>
                             </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Instructions:</h4>
+                        @include('dashboard.includes.instructions')
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 grid-margin stretch-card">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Instructions:</h4>
-                        @include('dashboard.includes.instructions')
-                </div>
-            </div>
-        </div>
     </div>
+
 @endsection
 @section('modals')
 @endsection
@@ -122,10 +111,25 @@
         var zeroContent = '{{$sucrose_contents['zero_content']}}';
 
         autonum_settings = {
-            currencySymbol : ' ₱',
+            currencySymbol : ' PHP',
             decimalCharacter : '.',
             digitGroupSeparator : ',',
         };
+
+        var nf = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'PHP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
 
         function delay(callback, ms) {
             var timer = 0;
@@ -151,6 +155,7 @@
                 }
             })
         }, 500));
+
         new AutoNumeric("#amount",autonum_settings);
 
         $("body").on('change', '#transaction_type', function() {
@@ -158,14 +163,15 @@
             var option = $("#transaction_type option[value='"+t.val()+"']");
             var type = option.attr('type');
             var amount = option.attr('amount');
-            if(option.attr('transGroup') == 'LAB' && amount == 0){
+            if(amount == 0){
                 amount = option.attr('regularFee');
             }
 
             var stringAmount = '';
             if(option.attr('transactionCode') != 'PRE'){
+                $("#divBtnAddProduct").slideUp();
                 if(amount != 0){
-                    stringAmount = type!='USER'?"<div><p>Fee: " + amount + (type == 'volume'?' / ' + type:'') +"</p></div>":"";
+                    stringAmount = "<div><p><strong>Fee:</strong> " + nf.format(amount) + (type != 'STATIC'?' / ' + type:'') +"</p></div>";
                 }
             }
 
@@ -177,11 +183,9 @@
                 $(this).slideUp();
             })
 
-            if(type == 'VOLUME'){
+            if(type != 'STATIC'){
                 $("#volume_container").slideDown();
                 $("#volume_container_amount").slideDown();
-            }if(type == 'USER'){
-                $("#amount_container").slideDown();
             }
 
             if(option.attr('transactionCode') == 'PRE'){
@@ -189,6 +193,7 @@
                     url : "{{route('dashboard.payments.getLabAnalysis')}}",
                     type: 'GET',
                     success: function (res) {
+                        $("#divBtnAddProduct").slideDown();
                         $("#divLabAnalysis").html(res);
                     },
                     error: function (res) {
@@ -220,30 +225,79 @@
             }
         })
 
+        function addLabAnalysisToListRegular(){
+            $('#transactionTypesLabAnalysis :selected').each(function(i, sel){
+                var names = $(sel).attr('labName');
+                var regFee = $(sel).attr('regularFee');
+                var tr = '<tr id='+$(sel).val()+'>' +
+                    '<td width="15%"><label class="text-success">Regular</label> <input type="text" hidden id="isExpedite[]" name="isExpedite[]" value="FALSE"> <input type="text" hidden name="tdLabSlugs[]" id="tdLabSlugs[]" class="form-control" value="'+$(sel).val()+'" readonly></td>'+
+                    '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdLabNames[]" id="tdLabNames[]" class="form-control" value="'+names+'" readonly></td>'+
+                    '<td width="15%"><label>'+regFee+'</label><input type="text" hidden name="tdLabFees[]" id="tdLabFee[]" class="form-control" value="'+regFee+'" readonly></td>'+
+                    '<td><a href="javascript:void(0)" class="btn btn-danger deleteRow"><i class=\'fa fa-trash-o\' ></i></a></td>'+
+                    '</tr>';
+                $('#tbTransactionTypesLabAnalysis > tbody').append(tr);
+            });
+        }
+
+        function addLabAnalysisToListExpedite(){
+            $('#transactionTypesLabAnalysis :selected').each(function(i, sel){
+                var names = $(sel).attr('labName');
+                var regFee = $(sel).attr('expediteFee');
+                var tr = '<tr id='+$(sel).val()+'>' +
+                    '<td width="15%"><label class="text-danger">Expedite</label> <input type="text" hidden id="isExpedite[]" name="isExpedite[]" value="TRUE"> <input type="text" hidden name="tdLabSlugs[]" id="tdLabSlugs[]" class="form-control" value="'+$(sel).val()+'" readonly></td>'+
+                    '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdLabNames[]" id="tdLabNames[]" class="form-control" value="'+names+'" readonly></td>'+
+                    '<td width="15%"><label>'+regFee+'</label><input type="text" hidden name="tdLabFees[]" id="tdLabFee[]" class="form-control" value="'+regFee+'" readonly></td>'+
+                    '<td><a href="javascript:void(0)" class="btn btn-danger deleteRow"><i class=\'fa fa-trash-o\' ></i></a></td>'+
+                    '</tr>';
+                $('#tbTransactionTypesLabAnalysis > tbody').append(tr);
+            });
+        }
+
+        $("body").on('click', '#tbTransactionTypesLabAnalysis tbody .deleteRow', function() {
+            $(this).parent().parent().remove();
+        });
+
+
+
         function addProductToList(){
             var r = $("#LabAnalysis");
             var option1 = $("#LabAnalysis option[id='"+r.val()+"']");
-            var names = option1.attr('name');
-            $("#totalVolume").val(Number($("#totalVolume").val())+Number($("#volume").val()));
-            $("#totalAmount").val(Number($("#totalAmount").val())+Number($("#volume_amount").val().replace("₱","")));
-            var table = $('#tbProduct')[0];
-            if (table.rows[option1.attr('id')]) {
-                var tdVol = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdVolume[]"]').val();
-                var tdAmnt = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdAmount[]"]').val();
-                $("#totalVolume").val(Number($("#totalVolume").val())-Number(tdVol));
-                $("#totalAmount").val(Number($("#totalAmount").val())-Number(tdAmnt.replace("₱","")));
-                $('#tbProduct tr[id='+option1.attr('id')+']').remove();
+            if(option1.attr('sucrose') == 0 || (option1.attr('sucrose') > 0 && $("#volume").val() > 0)){
+                if(option1.attr('sucrose') == 0){
+                    $("#volume_amount").val(zeroContent);
+                    $("#volume").val(0)
+                }
+                var r = $("#LabAnalysis");
+                var option1 = $("#LabAnalysis option[id='"+r.val()+"']");
+                var names = option1.attr('name');
+                $("#totalVolume").val(Number($("#totalVolume").val())+Number($("#volume").val()));
+                $("#totalAmount").val(Number($("#totalAmount").val())+Number($("#volume_amount").val().replace("PHP","")));
+                var table = $('#tbProduct')[0];
+                if (table.rows[option1.attr('id')]) {
+                    var tdVol = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdVolume[]"]').val();
+                    var tdAmnt = $('#tbProduct tr[id='+option1.attr('id')+'] td input[name="tdAmount[]"]').val();
+                    $("#totalVolume").val(Number($("#totalVolume").val())-Number(tdVol));
+                    $("#totalAmount").val(Number($("#totalAmount").val())-Number(tdAmnt.replace("PHP","")));
+                    $('#tbProduct tr[id='+option1.attr('id')+']').remove();
 
+                }
+
+                var tr = '<tr id='+option1.attr('id')+'>' +
+                    '<td width="15%"><label>'+option1.attr("id")+'</label> <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="'+option1.attr('id')+'" readonly></td>'+
+                    '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="'+names+'" readonly></td>'+
+                    '<td width="15%"><label>'+$("#volume").val()+'</label><input type="text" hidden name="tdVolume[]" id="tdVolume[]" class="form-control" value='+$("#volume").val()+' readonly></td>'+
+                    '<td class="text-lg-right" width="15%"><label>'+$("#volume_amount").val()+'</label><input type="text" hidden name="tdAmount[]" id="tdAmount[]" class="form-control" value='+$("#volume_amount").val().replace("PHP", "", ).replace(/\,/g,"")+' readonly></td>'+
+                    '<td><a href="javascript:void(0)" class="btn btn-danger deleteRow"><i class=\'fa fa-trash-o\' ></i></a></td>'+
+                    '</tr>';
+                $('#tbProduct > tbody').append(tr);
             }
-
-            var tr = '<tr id='+option1.attr('id')+'>' +
-                '<td width="15%"><label>'+option1.attr("id")+'</label> <input type="text" hidden name="tdID[]" id="tdID[]" class="form-control" value="'+option1.attr('id')+'" readonly></td>'+
-                '<td width="55%"><label>'+names+'</label><input type="text" hidden name="tdNames[]" id="tdNames[]" class="form-control" value="'+names+'" readonly></td>'+
-                '<td width="15%"><label>'+$("#volume").val()+'</label><input type="text" hidden name="tdVolume[]" id="tdVolume[]" class="form-control" value='+$("#volume").val()+' readonly></td>'+
-                '<td class="text-lg-right" width="15%"><label>'+$("#volume_amount").val()+'</label><input type="text" hidden name="tdAmount[]" id="tdAmount[]" class="form-control" value='+$("#volume_amount").val()+' readonly></td>'+
-                '<td><a href="javascript:void(0)" class="btn btn-danger deleteRow"><i class=\'fa fa-trash-o\' ></i></a></td>'+
-                '</tr>';
-            $('#tbProduct > tbody').append(tr);
+            else {
+                swal({
+                    title: "Empty!",
+                    text: "Please provide volume.",
+                    type: "error"
+                });
+            }
         }
 
         $('#tbProduct > tbody').on('click', '.deleteRow', function() {
@@ -256,17 +310,18 @@
             var sucCont = option.attr('sucrose');
             var stringAmount = '';
             if(sucCont == 0){
-                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='20%'>Sucrose Content: " + sucCont + "%</td><td width='20%'>Fee: " +  zeroContent + " / Application </td></tr></tbody></table></div>";
+                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='50%'><strong>Sucrose Content: </strong></td><td>" + sucCont + "%</td></tr><tr><td width='50%'><strong> Fee: </strong></td width='50%'><td>" +  nf.format(parseFloat(zeroContent)) + " / Application </td></tr></tbody></table></div>";
                 $("#volume_container").slideUp();
                 $("#volume_container_amount").slideUp();
+
             }
             else if(sucCont > 0 && sucCont <= baseContent){
-                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='20%'>Sucrose Content: " + sucCont + "%</td><td width='20%'>Fee: " + belowPrice + " / Lkg-Bag </td></tr></tbody></table></div>";
+                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='50%'><strong>Sucrose Content: </strong></td><td>" + sucCont + "%</td></tr><tr><td width='50%'><strong> Fee: </strong></td><td width='50%'>" + nf.format(parseFloat(belowPrice)) + " / Lkg-Bag </td></tr></tbody></table></div>";
                 $("#volume_container").slideDown();
                 $("#volume_container_amount").slideDown();
             }
             else if (sucCont > 0 && sucCont > baseContent) {
-                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='20%'>Sucrose Content: " + sucCont + "%</td><td width='20%'> Fee: " + abovePrice + " / Lkg-Bag </td></tr></tbody></table></div>";
+                stringAmount = "<div><table class='table mb-lg-3'><tbody><tr><td width='50%'><strong>Sucrose Content: </strong></td><td>" + sucCont + "%</td></tr><tr><td width='50%'><strong> Fee: </strong></td><td width='50%'>" + nf.format(parseFloat(abovePrice)) + " / Lkg-Bag </td></tr></tbody></table></div>";
                 $("#volume_container").slideDown();
                 $("#volume_container_amount").slideDown();
             }
@@ -302,17 +357,19 @@
             e.preventDefault();
             form = $(this);
             formData = form.serialize();
-            loading_btn(form);
             $.ajax({
                 url : "{{route('dashboard.payments.validate_form')}}",
                 data: formData,
                 type: 'POST',
                 success: function (res) {
-
                     $('.content-wrapper').html(res);
-
                 },
                 error: function (res) {
+                    swal({
+                        title: "Empty!",
+                        text: res.responseJSON.message.message,
+                        type: "error"
+                    });
                     console.log(res);
                     errored(form,res);
                 }
@@ -320,6 +377,14 @@
         })
 
         $("#transaction_types_group").change(function(){
+            $("#volume_container").slideUp();
+            $("#volume_container_amount").slideUp();
+            $("#divBtnAddProduct").slideUp();
+            $("#divLabAnalysis").html('');
+            $("#divTransactionTypesLabAnalysis").html('');
+            $("#amountString").html('');
+            $("#divProduct").slideUp();
+
             var t = $(this);
             var option = $("#transaction_types_group option[value='"+t.val()+"']");
             var optionID = option.val();

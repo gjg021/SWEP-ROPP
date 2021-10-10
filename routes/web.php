@@ -14,6 +14,7 @@
         Route::get('verifyTransaction', 'PaymentController@getTransaction')->name('verifyTransaction');
     });
     Route::get('verifyTransaction', 'PaymentController@getTransaction')->name('verifyTransaction');
+    Route::post('/preRegistration','Admin\PreRegistrationController@storePreRegistration')->name('preRegistration');
 
 	/** Dashboard **/
 	Route::group(['prefix'=>'dashboard', 'as' => 'dashboard.', 'middleware' => ['check.user_status']], function () {
@@ -26,7 +27,7 @@
 		Route::post('/user/logout/{slug}', 'UserController@logout')->name('user.logout');
 		Route::get('/user/{slug}/reset_password', 'UserController@resetPassword')->name('user.reset_password');
 		Route::patch('/user/reset_password/{slug}', 'UserController@resetPasswordPost')->name('user.reset_password_post');
-		Route::resource('user', 'UserController');
+		Route::resource('users', 'UserController');
 		/** PROFILE **/
 		Route::get('/profile', 'ProfileController@details')->name('profile.details');
 		Route::patch('/profile/update_account_username/{slug}', 'ProfileController@updateAccountUsername')->name('profile.update_account_username');
@@ -50,33 +51,15 @@
         Route::resource('std/premix','PremixController',[
             'as' => 'std'
         ]);
-
 	});
-
 	Route::get('/verify_email','User\UserController@verifyEmail')->name('dashboard.verify_email');
-
 	Route::get('/sendmail', 'User\UserController@sendEmailVerification');
-	
-	// Route::prefix('dashboard')->group(function(){
-
-	// 	// Route::get('/login', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
-	// 	// Route::post('/login', 'Auth\AdminLoginController@login')->name('admin.login.submit');
-
-	// 	Route::get('/home', 'User\HomeController@index')->name('home');
-
-
-	// 	//Route::get('/', 'AdminController@index')->name('admin.dashboard');
-
-	// });
-
-
 
 	Route::group(['prefix'=>'admin', 'as' => 'admin.', 'middleware' => ['check.admin_route']], function () {
         Route::resource('payments','Admin\OrderOfPaymentsController');
-		Route::get('/home', 'Admin\HomeController@index')->name('home');
+		Route::get('home', 'Admin\HomeController@index')->name('home');
 
 		Route::resource('menus', 'Admin\MenuController');
-
 		Route::resource('functions','Admin\FunctionController');
 		Route::post('functions/add_resource','Admin\FunctionController@add_resource')->name('functions.add_resource');
 		//Route::get('/', 'AdminController@index')->name('admin.dashboard');
@@ -89,8 +72,15 @@
 		Route::get('shipping-permits', 'Shared\ShippingPermitController@index')->name('shipping-permits.index');
 
         Route::resource('/sucrose','Admin\SucroseController');
+        Route::resource('/preRegistration','Admin\PreRegistrationController');
+        Route::resource('/labAnalysis', 'Admin\LabAnalysisController');
+        Route::resource('/transactionType', 'Admin\TransactionTypeController');
+        Route::get('labAnalysis/searchClient/{searchValue}', 'Admin\LabAnalysisController@searchClient')->name('labAnalysis.searchClient');
+        Route::get('labAnalysis/getClient/{selectedRecord}', 'Admin\LabAnalysisController@getClient')->name('labAnalysis.getClient');
+        Route::get('payments/view_file', 'Admin\OrderOfPaymentsController@view_file')->name('payments.view_file');
 	});
 
+	Route::get('printTransaction', 'PaymentController@printTransaction')->name('printTransaction');
 	Route::get('admin/login', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
 	Route::post('admin/login', 'Auth\AdminLoginController@login')->name('admin.login.submit');
 
